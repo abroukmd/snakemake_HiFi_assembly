@@ -1,0 +1,9 @@
+name: filter_lja_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.8
+  - minimap2
+  - filterbyname
+  - sortbyname

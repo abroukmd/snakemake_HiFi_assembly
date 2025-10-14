@@ -1,0 +1,32 @@
+rule chromeister:
+    input:
+        query = lambda wc: f"{project_dir}/{wc.sample}/FILTERED/{wc.sample}-HIFI-hifiasm.fasta",
+        ref = lambda wc: sample_refs[wc.sample]
+    output:
+        mat = f"{project_dir}/{{sample}}/CHROMEISTER/dotplot.mat",
+        score = f"{project_dir}/{{sample}}/CHROMEISTER/{{sample}}_score.txt"
+    log:
+        f"{project_dir}/{{sample}}/CHROMEISTER/{{sample}}.log",
+        f"{project_dir}/{{sample}}/CHROMEISTER/{{sample}}.err"
+    conda:
+        "../envs/chromeister_env.yaml"
+    shell:
+        """
+        set -euxo pipefail
+        mkdir -p $(dirname {output.mat})
+
+CHROMEISTER \
+    -query {input.query} \
+    -db {input.ref} \
+    -out {output.mat} \
+    -dimension 2000 \
+    > {log[0]} 2>> {log[1]}
+
+compute_score=$(realpath $(dirname $(which CHROMEISTER))/../bin/compute_score.R)
+if [ ! -f "$compute_score" ]; then
+    echo "compute_score.R not found in conda env!" >&2
+    exit 1
+fi
+
+"$compute_score" {output.mat} 2000 > {output.score} 2>> {log[1]}
+        """

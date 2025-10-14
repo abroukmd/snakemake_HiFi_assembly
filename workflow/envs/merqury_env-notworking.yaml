@@ -1,0 +1,8 @@
+name: merqury_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - merqury>=1.0,<1.3
+  - meryl

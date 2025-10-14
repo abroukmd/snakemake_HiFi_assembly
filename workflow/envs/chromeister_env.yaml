@@ -1,0 +1,9 @@
+name: chromeister_env
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - chromeister
+build:
+  script: ./post-link.sh

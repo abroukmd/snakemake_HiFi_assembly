@@ -1,0 +1,5 @@
+sample	HiFi	fq1	fq2	Ref
+FCM081	/data1/u0176926/HiFi_assemblies/HiFi_reads/FCM81.hifireads.fastq.gz	/data1/u0176926/illumina_assemblies/FCM81_S54_R1_001.fastq.gz	/data1/u0176926/illumina_assemblies/FCM81_S54_R2_001.fastq.gz	/data1/u0176926/Refs/FCM068_S-cerevisiae/GCF_000146045.2_R64_genomic.fna.gz
+FCM022	/data1/u0176926/HiFi_assemblies/HiFi_reads/FCM22.hifireads.fastq.gz	/data1/u0176926/illumina_assemblies/FCM22_S15_R1_001.fastq.gz	/data1/u0176926/illumina_assemblies/FCM22_S15_R2_001.fastq.gz	/data1/u0176926/Refs/FCM022_T-globosa/GCF_014133895.1_ASM1413389v1_genomic.fna
+FCM026	/data1/u0176926/HiFi_assemblies/HiFi_reads/FCM26.hifireads.fastq.gz	/data1/u0176926/illumina_assemblies/FCM026_S17_R1_001.fastq.gz	/data1/u0176926/illumina_assemblies/FCM026_S17_R2_001.fastq.gz	/data1/u0176926/Refs/FCM026_Z-rouxii/GCF_000026365.1_ASM2636v1_genomic.fna.gz
+FCM042	/data1/u0176926/HiFi_assemblies/HiFi_reads/FCM42.hifireads.fastq.gz	/data1/u0176926/illumina_assemblies/FCM042_S107_R1_001.fastq.gz	/data1/u0176926/illumina_assemblies/FCM042_S107_R2_001.fastq.gz	/data1/u0176926/Refs/Pichia_kluyveri/Pichia_kluyveri-GCA_029581865.1.fasta

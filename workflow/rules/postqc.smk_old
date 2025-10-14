@@ -1,0 +1,209 @@
+import os
+#from snakemake.io import directory
+
+# Define accessors for dynamic paths
+def get_fastq(wc):
+    return sample_paths[wc.sample]
+
+def get_fq1(wc):
+    return sample_fq1[wc.sample]
+
+def get_fq2(wc):
+    return sample_fq2[wc.sample]
+
+def get_asm_hifiasm(wc): return os.path.abspath(f"{project_dir}/{wc.sample}/FILTERED/{wc.sample}-HIFI-hifiasm.fasta")
+
+def get_asm_lja(wc): return os.path.abspath(f"{project_dir}/{wc.sample}/FILTERED/{wc.sample}-HIFI-lja.fasta")
+
+def get_merqury_done(wc): return f"Assemblies/{wc.sample}/QC/merqury/merqury.done"
+
+def get_abs_path(wildcards, filename):
+    return os.path.abspath(f"{project_dir}/{wildcards.sample}/FILTERED/{wildcards.sample}-HIFI-{filename}.fasta")
+
+rule busco:
+    input:
+        asm_hifiasm = get_asm_hifiasm,
+        asm_lja     = get_asm_lja,
+        hifiasm_done = "Assemblies/{sample}/HIFIASM/hifiasm.done",
+        lja_done     = "Assemblies/{sample}/LJA/lja.done",
+        filter_hifiasm_done = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta",
+        filter_lja_done     = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"
+    output:
+        busco_hifiasm_dir  = directory("Assemblies/{sample}/QC/BUSCO-hifiasm/{sample}-HIFI-hifiasm"),
+        busco_hifiasm_done = "Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done",
+        busco_lja_dir      = directory("Assemblies/{sample}/QC/BUSCO-lja/{sample}-HIFI-lja"),
+        busco_lja_done     = "Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"
+    params:
+        cores = 32,
+        hifiasm_outpath = "Assemblies/{sample}/QC/BUSCO-hifiasm",
+        lja_outpath     = "Assemblies/{sample}/QC/BUSCO-lja"
+    conda:
+        "../envs/busco_env.yaml"
+    shell:
+        """
+        set -euo pipefail
+
+        mkdir -p {params.hifiasm_outpath}
+        mkdir -p {params.lja_outpath}
+
+        busco -i {input.asm_hifiasm} -c {params.cores} -m geno -f --auto-lineage-euk \
+            --out_path {params.hifiasm_outpath} -o {wildcards.sample}-HIFI-hifiasm
+
+        touch {output.busco_hifiasm_done}
+
+        busco -i {input.asm_lja} -c {params.cores} -m geno -f --auto-lineage-euk \
+            --out_path {params.lja_outpath} -o {wildcards.sample}-HIFI-lja
+
+        touch {output.busco_lja_done}
+        """
+
+
+#rule busco:
+#    input:
+#        asm_hifiasm = get_asm_hifiasm,
+#        asm_lja     = get_asm_lja
+#    output:
+#        busco_hifiasm_dir = directory("Assemblies/{sample}/QC/BUSCO-hifiasm/{sample}-HIFI-hifiasm"),
+#        busco_hifiasm_done = "Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done",
+#        busco_lja_dir = directory("Assemblies/{sample}/QC/BUSCO-lja/{sample}-HIFI-lja"),
+#        busco_lja_done = "Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"
+#    params:
+#        cores = 32,
+#        hifiasm_outpath = "Assemblies/{sample}/QC/BUSCO-hifiasm",
+#        lja_outpath = "Assemblies/{sample}/QC/BUSCO-lja"
+#    conda:
+#        "../envs/busco_env.yaml"
+#    shell:
+#        """
+#        set -euo pipefail
+#
+#        mkdir -p {params.hifiasm_outpath}
+#        mkdir -p {params.lja_outpath}
+#
+#        busco -i {input.asm_hifiasm} -c {params.cores} -m geno -f --auto-lineage-euk \
+#            --out_path {params.hifiasm_outpath} -o {wildcards.sample}-HIFI-hifiasm
+#
+#        touch {output.busco_hifiasm_done}
+#
+#        busco -i {input.asm_lja} -c {params.cores} -m geno -f --auto-lineage-euk \
+#            --out_path {params.lja_outpath} -o {wildcards.sample}-HIFI-lja
+#
+#        touch {output.busco_lja_done}
+#        """
+
+
+rule quast:
+    input:
+        asm_hifiasm = get_asm_hifiasm,
+        asm_lja     = get_asm_lja
+    output:
+        quast_done = "Assemblies/{sample}/QC/QUAST/quast.done"
+    params:
+        cores = 32
+    conda:
+        "../envs/quast_env.yaml"
+    shell:
+        """
+        set -euo pipefail
+        mkdir -p $(dirname {output.quast_done})
+        quast -o $(dirname {output.quast_done}) -t 32 {input.asm_hifiasm} {input.asm_lja}
+        touch {output.quast_done}
+        """
+rule merqury:
+    input:
+        fq1 = lambda wc: sample_fq1[wc.sample],
+        fq2 = lambda wc: sample_fq2[wc.sample],
+        hifiasm = get_asm_hifiasm,
+        lja     = get_asm_lja
+    output:
+        done = "Assemblies/{sample}/QC/merqury/merqury.done"
+    params:
+        merqury_out = lambda wc: f"{wc.sample}_merqury"
+    container:
+        "https://depot.galaxyproject.org/singularity/merqury:1.3--hdfd78af_0"
+    shell:
+        r'''
+        set -euo pipefail
+
+        OUTDIR=$(dirname {output.done})
+        mkdir -p "$OUTDIR"
+        cd "$OUTDIR"
+
+        echo "[INFO] Checking FASTQ input files for {wildcards.sample}" >&2
+        for f in {input.fq1} {input.fq2}; do
+            if [[ ! -s "$f" ]]; then
+                echo "[ERROR] FASTQ file $f does not exist or is empty." >&2
+                exit 1
+            fi
+        done
+
+        echo "[INFO] Copying assemblies to avoid symlink issues inside container" >&2
+        cp {input.hifiasm} . || {{ echo "Missing: {input.hifiasm}" >&2; exit 1; }}
+        cp {input.lja} . || {{ echo "Missing: {input.lja}" >&2; exit 1; }}
+
+        echo "[INFO] Counting k-mers for {wildcards.sample}" >&2
+        if ! meryl k=21 count {input.fq1} {input.fq2} output {wildcards.sample}.meryl; then
+            echo "[ERROR] meryl count failed for {wildcards.sample}" >&2
+            exit 1
+        fi
+
+        echo "[INFO] Running Merqury" >&2
+        if ! merqury.sh {wildcards.sample}.meryl {wildcards.sample}-HIFI-hifiasm.fasta {wildcards.sample}-HIFI-lja.fasta {params.merqury_out} > merqury.log 2>&1; then
+            echo "[ERROR] merqury.sh failed for {wildcards.sample}, check merqury.log" >&2
+            cat merqury.log >&2
+            exit 1
+        fi
+
+        mkdir -p "$(dirname {output.done})"
+        touch {output.done}
+        '''
+
+
+#rule merqury:
+#    input:
+#        fq1 = lambda wc: sample_fq1[wc.sample],
+#        fq2 = lambda wc: sample_fq2[wc.sample],
+#        hifiasm = get_asm_hifiasm,
+#        lja     = get_asm_lja
+#    output:
+#        done = lambda wc: os.path.join(project_dir, f"{wc.sample}/QC/merqury/merqury.done")
+#    params:
+#        merqury_out = lambda wc: f"{wc.sample}_merqury"
+#    container:
+#        "https://depot.galaxyproject.org/singularity/merqury:1.3--hdfd78af_0"
+#    shell:
+#        r'''
+#        set -euo pipefail
+#
+#        OUTDIR=$(dirname {output.done})
+#        mkdir -p "$OUTDIR"
+#        cd "$OUTDIR"
+#
+#        echo "[INFO] Checking FASTQ input files for {wildcards.sample}" >&2
+#        for f in {input.fq1} {input.fq2}; do
+#            if [[ ! -s "$f" ]]; then
+#                echo "[ERROR] FASTQ file $f does not exist or is empty." >&2
+#                exit 1
+#            fi
+#        done
+#
+#        echo "[INFO] Copying assemblies to avoid symlink issues inside container" >&2
+#        cp {input.hifiasm} . || {{ echo "Missing: {input.hifiasm}" >&2; exit 1; }}
+#        cp {input.lja} . || {{ echo "Missing: {input.lja}" >&2; exit 1; }}
+#
+#        echo "[INFO] Counting k-mers for {wildcards.sample}" >&2
+#        if ! meryl k=21 count {input.fq1} {input.fq2} output {wildcards.sample}.meryl; then
+#            echo "[ERROR] meryl count failed for {wildcards.sample}" >&2
+#            exit 1
+#        fi
+#
+#        echo "[INFO] Running Merqury" >&2
+#        if ! merqury.sh {wildcards.sample}.meryl {wildcards.sample}-HIFI-hifiasm.fasta {wildcards.sample}-HIFI-lja.fasta {params.merqury_out} > merqury.log 2>&1; then
+#            echo "[ERROR] merqury.sh failed for {wildcards.sample}, check merqury.log" >&2
+#            cat merqury.log >&2
+#            exit 1
+#        fi
+#
+#        mkdir -p "$(dirname {output.done})"
+#        touch {output.done}
+#        '''

@@ -1,0 +1,119 @@
+import pandas as pd
+from pathlib import Path
+import os
+
+# ──────────────────────────────────────────────────
+# Validate and load config
+# ──────────────────────────────────────────────────
+
+sample_sheet = config.get("sample_sheet", "").strip()
+if not sample_sheet:
+    raise ValueError("Missing 'sample_sheet' in config file.")
+
+project_dir = config.get("project_dir", "").strip().rstrip("/")
+if not project_dir:
+    raise ValueError("Missing 'project_dir' in config file.")
+
+# ──────────────────────────────────────────────────
+# Load sample metadata and validate presence of all listed files
+# ──────────────────────────────────────────────────
+
+samples_df = pd.read_csv(sample_sheet, sep="\t")
+required_columns = {"sample", "HiFi", "Ref", "fq1", "fq2"}
+missing = required_columns - set(samples_df.columns)
+if missing:
+    raise ValueError(f"Missing columns in sample sheet: {missing}")
+
+samples = samples_df["sample"].tolist()
+sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
+sample_refs = dict(zip(samples_df["sample"], samples_df["Ref"]))
+
+# Create dictionaries for fq1 and fq2 from the samples_df
+sample_fq1 = dict(zip(samples_df["sample"], samples_df["fq1"]))
+sample_fq2 = dict(zip(samples_df["sample"], samples_df["fq2"]))
+
+# Make them available globally to rule files
+globals()["sample_fq1"] = sample_fq1
+globals()["sample_fq2"] = sample_fq2
+
+for s in samples:
+    fq1 = sample_fq1[s]
+    fq2 = sample_fq2[s]
+    hifi = sample_paths[s]
+    for path in [hifi, fq1, fq2]:
+        if not Path(path).is_file():
+            print(f"[DEBUG] Sample {s}: Missing file -> {path}")
+            dir_path = Path(path).parent
+            print(f"[DEBUG] Listing contents of {dir_path}:")
+            for p in sorted(dir_path.glob("*.fastq.gz")):
+                print(f"  - {p.name}")
+            raise FileNotFoundError(f"Input file not found for sample {s}: {path}")
+
+def reference_from_tsv(sample):
+    if sample not in sample_refs:
+        raise ValueError(f"Reference genome not found for sample {sample} in sample sheet")
+    return sample_refs[sample]
+
+SAMPLES = samples
+PLOIDIES = [1, 2, 3, 4]
+
+# ──────────────────────────────────────────────────
+# Include modular rule files
+# ──────────────────────────────────────────────────
+
+include: "rules/qc.smk"
+#include: "rules/smudgeplot.smk"
+include: "rules/assembly.smk"
+include: "rules/oatk.smk"
+include: "rules/filtering.smk"
+include: "rules/annotation.smk"
+include: "rules/postqc.smk"
+include: "rules/chromeister.smk"
+include: "rules/merqury.smk"
+#include: "rules/multiqc.smk"
+
+# ──────────────────────────────────────────────────
+# Final target rule
+# ──────────────────────────────────────────────────
+
+rule all:
+    input:
+        # QC outputs
+        expand("Assemblies/{sample}/QC/nanoplot", sample=SAMPLES),
+#        expand("Assemblies/{sample}/QC/genomescope/ploidy_{ploidy}/model.txt", sample=SAMPLES, ploidy=PLOIDIES),
+#        expand("Assemblies/{sample}/QC/smudgeplot/smudgeplot.done", sample=SAMPLES),
+
+        # OATK output
+        expand("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta", sample=SAMPLES),
+
+        # Assemblies (done flags)
+        expand("Assemblies/{sample}/HIFIASM/hifiasm.done", sample=SAMPLES),
+        expand("Assemblies/{sample}/LJA/lja.done", sample=SAMPLES),
+
+        # Telosearch
+        expand("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta", sample=SAMPLES),
+
+        # Filtered assemblies
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta", sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf", sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list", sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta", sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf", sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list", sample=SAMPLES),
+
+        # rRNA annotation
+        expand("Assemblies/{sample}/FILTERED/barrnap.done", sample=SAMPLES),
+
+        # Post QC
+        expand("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done", sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done", sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/QUAST/quast.done", sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/merqury/merqury.done", sample=SAMPLES),
+
+        # Chromeister
+        expand("Assemblies/{sample}/CHROMEISTER/.hifiasm.done", sample=SAMPLES),
+        expand("Assemblies/{sample}/CHROMEISTER/.lja.done", sample=SAMPLES),
+        expand("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done", sample=SAMPLES)
+
+        # multiQC
+ #       expand("Assemblies/multiqc/multiqc.done")

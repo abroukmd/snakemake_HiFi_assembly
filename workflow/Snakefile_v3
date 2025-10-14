@@ -1,0 +1,39 @@
+import pandas as pd
+
+# Load samples and paths
+sample_sheet = config["sample_sheet"]
+samples_df = pd.read_csv(sample_sheet, sep="\t")
+samples = samples_df["sample"].tolist()
+sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
+sample_refs = dict(zip(samples_df["sample"], samples_df["Ref"]))
+
+def reference_from_tsv(sample):
+    if sample not in sample_refs:
+        raise ValueError(f"Reference genome not found for sample {sample} in sample sheet")
+    return sample_refs[sample]
+
+PLOIDIES = [1, 2, 3, 4]
+project_dir = config["project_dir"]
+
+# Include rule files
+include: "rules/qc.smk"
+include: "rules/oatk.smk"
+include: "rules/assembly.smk"
+include: "rules/filtering.smk"
+include: "rules/annotation.smk"
+include: "rules/chromeister.smk"
+
+rule all:
+    input:
+        expand(f"{project_dir}/{{sample}}/QC/nanoplot", sample=samples),
+        expand(f"{project_dir}/{{sample}}/QC/genomescope/ploidy_{{ploidy}}/model.txt", sample=samples, ploidy=PLOIDIES),
+        expand(f"{project_dir}/{{sample}}/OATK/{{sample}}.mito.ctg.fasta", sample=samples),
+        expand(f"{project_dir}/{{sample}}/HIFIASM/{{sample}}.fasta", sample=samples),
+        expand(f"{project_dir}/{{sample}}/LJA/assembly.fasta", sample=samples),
+        expand(f"{project_dir}/{{sample}}/TELOSEARCH/{{sample}}.hifireads.fasta", sample=samples),
+        expand(f"{project_dir}/{{sample}}/FILTERED/{{sample}}-HIFI-hifiasm.fasta", sample=samples),
+        expand(f"{project_dir}/{{sample}}/FILTERED/{{sample}}-HIFI-lja.fasta", sample=samples),
+        expand(f"{project_dir}/{{sample}}/FILTERED/{{sample}}-barrnap-hifiasm.gff3", sample=samples),
+        expand(f"{project_dir}/{{sample}}/FILTERED/{{sample}}-barrnap-lja.gff3", sample=samples),
+        expand(f"{project_dir}/{{sample}}/CHROMEISTER/dotplot.mat", sample=samples),
+        expand(f"{project_dir}/{{sample}}/CHROMEISTER/{{sample}}_score.txt", sample=samples)

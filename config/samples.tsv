@@ -1,0 +1,2 @@
+sample	HiFi	fq1	fq2	Ref
+FCM081	/data1/u0176926/HiFi_assemblies/HiFi_reads/FCM81.hifireads.fastq.gz	/data1/u0176926/illumina_assemblies/fastq/FCM081_R1.fastq.gz	/data1/u0176926/illumina_assemblies/fastq/FCM081_R2.fastq.gz	/data1/u0176926/Refs/FCM068_S-cerevisiae/GCF_000146045.2_R64_genomic.fna.gz

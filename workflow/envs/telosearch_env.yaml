@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - telosearchlr
+  - plotly
+  - pip
+  - pip:
+      - kaleido>=1.0.0

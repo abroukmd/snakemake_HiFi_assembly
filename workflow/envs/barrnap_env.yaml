@@ -1,0 +1,6 @@
+name: hifiasm_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - barrnap

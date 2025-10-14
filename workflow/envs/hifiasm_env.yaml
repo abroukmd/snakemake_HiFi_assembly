@@ -1,0 +1,10 @@
+name: hifiasm_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.8
+  - hifiasm=0.25.0
+  - minimap2
+  - bbmap
+  - seqtk

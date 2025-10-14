@@ -1,0 +1,102 @@
+import pandas as pd
+from pathlib import Path
+
+# ──────────────────────────────────────────────────
+# Validate and load config
+# ──────────────────────────────────────────────────
+
+sample_sheet = config.get("sample_sheet")
+if sample_sheet is None:
+    raise ValueError("Missing 'sample_sheet' in config file.")
+
+project_dir = config.get("project_dir")
+if project_dir is None:
+    raise ValueError("Missing 'project_dir' in config file.")
+
+# ──────────────────────────────────────────────────
+# Load sample metadata and validate presence of all listed files
+# ──────────────────────────────────────────────────
+
+samples_df = pd.read_csv(sample_sheet, sep="\t")
+samples = samples_df["sample"].tolist()
+sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
+sample_refs = dict(zip(samples_df["sample"], samples_df["Ref"]))
+sample_fq1 = dict(zip(samples_df["sample"], samples_df["fq1"]))
+sample_fq2 = dict(zip(samples_df["sample"], samples_df["fq2"]))
+
+for s in samples:
+    fq1 = sample_fq1[s]
+    fq2 = sample_fq2[s]
+    hifi = sample_paths[s]
+
+    for path in [hifi, fq1, fq2]:
+        if not Path(path).is_file():
+            print(f"[DEBUG] Sample {s}: Missing file -> {path}")
+            dir_path = Path(path).parent
+            print(f"[DEBUG] Listing contents of {dir_path}:")
+            for p in sorted(dir_path.glob("*.fastq.gz")):
+                print(f"  - {p.name}")
+            raise FileNotFoundError(f"Input file not found for sample {s}: {path}")
+
+def reference_from_tsv(sample):
+    if sample not in sample_refs:
+        raise ValueError(f"Reference genome not found for sample {sample} in sample sheet")
+    return sample_refs[sample]
+
+SAMPLES = samples
+PLOIDIES = [1, 2, 3, 4]
+
+# ──────────────────────────────────────────────────
+# Include modular rule files
+# ──────────────────────────────────────────────────
+
+include: "rules/qc.smk"
+include: "rules/assembly.smk"
+include: "rules/oatk.smk"
+include: "rules/filtering.smk"
+include: "rules/annotation.smk"
+include: "rules/postqc.smk"
+include: "rules/chromeister.smk"
+
+# ──────────────────────────────────────────────────
+# Final target rule
+# ──────────────────────────────────────────────────
+
+rule all:
+    input:
+        # QC outputs
+        expand("Assemblies/{sample}/QC/nanoplot", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/genomescope/ploidy_{ploidy}/model.txt", project_dir=project_dir, sample=SAMPLES, ploidy=PLOIDIES),
+
+        # OATK output
+        expand("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta", project_dir=project_dir, sample=SAMPLES),
+
+        # Assemblies (done files used for stability)
+        expand("Assemblies/{sample}/HIFIASM/hifiasm.done", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/LJA/lja.done", project_dir=project_dir, sample=SAMPLES),
+
+        # Telosearch
+        expand("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta", project_dir=project_dir, sample=SAMPLES),
+
+        # Filtered assemblies — trigger filtering.smk
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list", project_dir=project_dir, sample=SAMPLES),
+
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list", project_dir=project_dir, sample=SAMPLES),
+
+        # rRNA annotation
+        expand("Assemblies/{sample}/FILTERED/barrnap.done", project_dir=project_dir, sample=SAMPLES),
+
+        # Post QC
+        expand("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/QUAST/quast.done", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/QC/merqury/merqury.done", project_dir=project_dir, sample=SAMPLES),
+
+        # Chromeister
+        expand("Assemblies/{sample}/CHROMEISTER/.hifiasm.done", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/CHROMEISTER/.lja.done", project_dir=project_dir, sample=SAMPLES),
+        expand("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done", project_dir=project_dir, sample=SAMPLES)
