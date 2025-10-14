@@ -7,4 +7,4 @@
 	- snakemake installed (conda)
 
 ## Usage
-	- snakemake --use-conda --cores 48 --keep-going --rerun-incomplete --configfile config/config.yaml
+	- snakemake --use-conda --cores 32 --printshellcmds --latency-wait 30 --keep-going --rerun-incomplete --configfile config/config.yaml

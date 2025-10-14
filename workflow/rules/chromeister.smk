@@ -1,20 +1,19 @@
-
 import pandas as pd
 
 samples = pd.read_csv(config["sample_sheet"], sep="\t", index_col="sample").to_dict(orient="index")
 
 rule chromeister_hifiasm:
     input:
-        query = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta",
+        query = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
         ref = lambda wc: samples[wc.sample]["Ref"],
-        hifiasm_done = "Assemblies/{sample}/HIFIASM/hifiasm.done"
+        hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done")
     output:
-        mat   = "Assemblies/{sample}/CHROMEISTER/{sample}-hifiasm.mat",
-        score = "Assemblies/{sample}/CHROMEISTER/{sample}_score.txt",
-        done  = "Assemblies/{sample}/CHROMEISTER/.hifiasm.done"
+        mat   = outpath("Assemblies/{sample}/CHROMEISTER/{sample}-hifiasm.mat"),
+        score = outpath("Assemblies/{sample}/CHROMEISTER/{sample}_score.txt"),
+        done  = outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done")
     log:
-        out = "Assemblies/{sample}/CHROMEISTER/{sample}.log",
-        err = "Assemblies/{sample}/CHROMEISTER/{sample}.err"
+        out = outpath("Assemblies/{sample}/CHROMEISTER/{sample}.log"),
+        err = outpath("Assemblies/{sample}/CHROMEISTER/{sample}.err")
     conda:
         "../envs/chromeister_env.yaml"
     shell:
@@ -45,16 +44,16 @@ rule chromeister_hifiasm:
 
 rule chromeister_lja:
     input:
-        query = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta",
+        query = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
         ref = lambda wc: samples[wc.sample]["Ref"],
-        lja_done = "Assemblies/{sample}/LJA/lja.done"
+        lja_done = outpath("Assemblies/{sample}/LJA/lja.done")
     output:
-        mat   = "Assemblies/{sample}/CHROMEISTER/{sample}-lja.mat",
-        score = "Assemblies/{sample}/CHROMEISTER/{sample}_lja_score.txt",
-        done  = "Assemblies/{sample}/CHROMEISTER/.lja.done"
+        mat   = outpath("Assemblies/{sample}/CHROMEISTER/{sample}-lja.mat"),
+        score = outpath("Assemblies/{sample}/CHROMEISTER/{sample}_lja_score.txt"),
+        done  = outpath("Assemblies/{sample}/CHROMEISTER/.lja.done")
     log:
-        out = "Assemblies/{sample}/CHROMEISTER/{sample}_lja.log",
-        err = "Assemblies/{sample}/CHROMEISTER/{sample}_lja.err"
+        out = outpath("Assemblies/{sample}/CHROMEISTER/{sample}_lja.log"),
+        err = outpath("Assemblies/{sample}/CHROMEISTER/{sample}_lja.err")
     conda:
         "../envs/chromeister_env.yaml"
     shell:
@@ -85,17 +84,17 @@ rule chromeister_lja:
 
 rule chromeister_compare:
     input:
-        hifiasm = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta",
-        lja = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta",
-        hifiasm_done = "Assemblies/{sample}/HIFIASM/hifiasm.done",
-        lja_done = "Assemblies/{sample}/LJA/lja.done"
+        hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
+        lja = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
+        hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"),
+        lja_done = outpath("Assemblies/{sample}/LJA/lja.done")
     output:
-        mat   = "Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}-compare.mat",
-        score = "Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}_compare_score.txt",
-        done  = "Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done"
+        mat   = outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}-compare.mat"),
+        score = outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}_compare_score.txt"),
+        done  = outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done")
     log:
-        out = "Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}_compare.log",
-        err = "Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}_compare.err"
+        out = outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}_compare.log"),
+        err = outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/{sample}_compare.err")
     conda:
         "../envs/chromeister_env.yaml"
     shell:

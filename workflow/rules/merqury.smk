@@ -19,7 +19,6 @@ def get_fq2_abs(wc):
     sample = normalize_sample(wc)
     return sample_fq2[sample]
 
-
 rule merqury:
     input:
         fq1 = get_fq1_abs,

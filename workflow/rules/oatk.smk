@@ -6,16 +6,16 @@ rule oatk:
     input:
         fastq = lambda wildcards: sample_paths[wildcards.sample]
     output:
-        gfa = "Assemblies/{sample}/OATK/{sample}.mito.gfa",
-        ctg = "Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta",
-        done = "Assemblies/{sample}/OATK/.done"
+        gfa = outpath("Assemblies/{sample}/OATK/{sample}.mito.gfa"),
+        ctg = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
+        done = outpath("Assemblies/{sample}/OATK/.done")
     params:
-        outprefix = "Assemblies/{sample}/OATK/{sample}",
+        outprefix = outpath("Assemblies/{sample}/OATK/{sample}"),
         db = config["oatk_db"]
     conda:
         "../envs/oatk_env.yaml"
     log:
-        "Assemblies/{sample}/OATK/oatk.log"
+        outpath("Assemblies/{sample}/OATK/oatk.log")
     shell:
         """
         mkdir -p $(dirname {params.outprefix})
@@ -25,9 +25,9 @@ rule oatk:
 
 #rule bandage:
 #    input:
-#        gfa = "Assemblies/{sample}/OATK/{sample}.mito.gfa"
+#        gfa = outpath("Assemblies/{sample}/OATK/{sample}.mito.gfa")
 #    output:
-#        image = "Assemblies/{sample}/OATK/{sample}.bandage.png"
+#        image = outpath("Assemblies/{sample}/OATK/{sample}.bandage.png")
 #    conda:
 #        "../envs/bandage_env.yaml"
 #    shell:

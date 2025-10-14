@@ -2,10 +2,10 @@ rule nanoplot:
     input:
         lambda wildcards: sample_paths[wildcards.sample]
     log:
-        stdout = "Assemblies/{sample}/QC/nanoplot/nanoplot.log",
-        stderr = "Assemblies/{sample}/QC/nanoplot/nanoplot.err"
+        stdout = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.log"),
+        stderr = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.err")
     output:
-        nanoplot_dir = directory("Assemblies/{sample}/QC/nanoplot")
+        nanoplot_dir = directory(outpath("Assemblies/{sample}/QC/nanoplot"))
     conda:
         "../envs/nanoplot_env.yaml"
     params:
@@ -15,18 +15,17 @@ rule nanoplot:
     shell:
         "NanoPlot -o {output} -t {params.cores} --fastq {input} --maxlength 40000 --plots dot"
 
-
 #rule jellyfish_histo:
 #    input:
 #        fastq = lambda wildcards: sample_paths[wildcards.sample]
 #    log:
-#        stdout = "Assemblies/{sample}/QC/genomescope/genomescope.log",
-#        stderr = "Assemblies/{sample}/QC/genomescope/genomescope.err"
+#        stdout = outpath("Assemblies/{sample}/QC/genomescope/genomescope.log"),
+#        stderr = outpath("Assemblies/{sample}/QC/genomescope/genomescope.err")
 #    output:
-#        histo = "Assemblies/{sample}/QC/genomescope/{sample}_21mer.histo"
+#        histo = outpath("Assemblies/{sample}/QC/genomescope/{sample}_21mer.histo")
 #    params:
 #        k = 21,
-#        outdir = "Assemblies/{sample}/QC/genomescope"
+#        outdir = outpath("Assemblies/{sample}/QC/genomescope")
 #    conda:
 #        "../envs/genomescope_env.yaml"
 #    shell:
@@ -36,19 +35,18 @@ rule nanoplot:
 #        jellyfish histo -t 10 {params.outdir}/{wildcards.sample}_{params.k}mer.jf > {output.histo}
 #        """
 
-
 #rule genomescope:
 #    input:
-#        histo = "Assemblies/{sample}/QC/genomescope/{sample}_21mer.histo"
+#        histo = outpath("Assemblies/{sample}/QC/genomescope/{sample}_21mer.histo")
 #    output:
-#        model = "Assemblies/{sample}/QC/genomescope/ploidy_{ploidy}/model.txt"
+#        model = outpath("Assemblies/{sample}/QC/genomescope/ploidy_{ploidy}/model.txt")
 #    params:
 #        k = 21,
-#        outdir = "Assemblies/{sample}/QC/genomescope/ploidy_{ploidy}"
+#        outdir = outpath("Assemblies/{sample}/QC/genomescope/ploidy_{ploidy}")
 #    conda:
 #        "../envs/genomescope_env.yaml"
 #    log:
-#        "Assemblies/{sample}/QC/genomescope/genomescope-ploidy_{ploidy}.log"
+#        outpath("Assemblies/{sample}/QC/genomescope/genomescope-ploidy_{ploidy}.log")
 #    shell:
 #        """
 #        mkdir -p {params.outdir}

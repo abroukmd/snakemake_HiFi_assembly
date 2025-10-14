@@ -1,17 +1,16 @@
-
 rule barrnap:
     input:
-        asm_hifiasm = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta",
-        asm_lja     = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta",
-        hifiasm_done = "Assemblies/{sample}/HIFIASM/hifiasm.done",
-        lja_done     = "Assemblies/{sample}/LJA/lja.done"
+        asm_hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
+        asm_lja     = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
+        hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"),
+        lja_done     = outpath("Assemblies/{sample}/LJA/lja.done")
     output:
-        gff3_hifiasm = "Assemblies/{sample}/FILTERED/{sample}-barrnap-hifiasm.gff3",
-        gff3_lja     = "Assemblies/{sample}/FILTERED/{sample}-barrnap-lja.gff3",
-        done         = "Assemblies/{sample}/FILTERED/barrnap.done"
+        gff3_hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-barrnap-hifiasm.gff3"),
+        gff3_lja     = outpath("Assemblies/{sample}/FILTERED/{sample}-barrnap-lja.gff3"),
+        done         = outpath("Assemblies/{sample}/FILTERED/barrnap.done")
     log:
-        barrnap_hifiasm_log  =   "Assemblies/{sample}/FILTERED/barrnap/barrnap_hifiasm.log",
-        barrnap_lja_log  =   "Assemblies/{sample}/FILTERED/barrnap/barrnap_lja.log"
+        barrnap_hifiasm_log  =   outpath("Assemblies/{sample}/FILTERED/barrnap/barrnap_hifiasm.log"),
+        barrnap_lja_log  =   outpath("Assemblies/{sample}/FILTERED/barrnap/barrnap_lja.log")
     conda:
         "../envs/barrnap_env.yaml"
     shell:
@@ -28,15 +27,15 @@ rule telosearch:
     input:
         fastq = lambda wildcards: sample_paths[wildcards.sample]
     output:
-        fasta = "Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta",
-        outdir = directory("Assemblies/{sample}/TELOSEARCH")
+        fasta = outpath("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta"),
+        outdir = directory(outpath("Assemblies/{sample}/TELOSEARCH"))
     params:
         threads = 4
     conda:
         "../envs/telosearch_env.yaml"
     log:
-        stdout = "Assemblies/{sample}/TELOSEARCH/telosearchlr.log",
-        stderr = "Assemblies/{sample}/TELOSEARCH/telosearchlr.err"
+        stdout = outpath("Assemblies/{sample}/TELOSEARCH/telosearchlr.log"),
+        stderr = outpath("Assemblies/{sample}/TELOSEARCH/telosearchlr.err")
     shell:
         """
         mkdir -p {output.outdir}

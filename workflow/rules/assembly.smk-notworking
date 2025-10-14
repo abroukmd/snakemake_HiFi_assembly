@@ -1,0 +1,104 @@
+rule hifiasm:
+    input:
+        fastq = lambda wildcards: sample_paths[wildcards.sample]
+    output:
+        fasta = outpath("Assemblies/{sample}/HIFIASM/{sample}.fasta"),
+        done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done")
+    conda:
+        "../envs/hifiasm_env.yaml"
+    params:
+        cores = 32
+    log:
+        outpath("Assemblies/{sample}/HIFIASM/hifiasm.log")
+    shell:
+        """
+        set -euo pipefail
+
+        mkdir -p Assemblies/{wildcards.sample}/HIFIASM
+        hifiasm -o Assemblies/{wildcards.sample}/HIFIASM/{wildcards.sample} -t {params.cores} {input.fastq} > {log} 2>&1
+
+        # Convert GFA to FASTA
+        awk '/^S/{{print ">"$2"\\n"$3}}' \
+            Assemblies/{wildcards.sample}/HIFIASM/{wildcards.sample}.bp.p_ctg.gfa > {output.fasta}
+
+        touch {output.done}
+        """
+
+
+#rule lja:
+#    input:
+#        fastq = lambda wc: sample_paths[wc.sample]
+#    output:
+#        fasta = outpath("Assemblies/{sample}/LJA/assembly.fasta"),
+#        done  = outpath("Assemblies/{sample}/LJA/lja.done")
+#    conda:
+#        "../envs/lja_env.yaml"
+#    threads: 32
+#    log:
+#        outpath("Assemblies/{sample}/LJA/lja.log")
+
+#    run:
+#        out_dir = outpath(f"Assemblies/{wildcards.sample}/LJA")
+#        shell(f"""
+#            set -euo pipefail
+
+#            echo "[INFO] Running LJA for sample {wildcards.sample}" > {log}
+
+#            # Run LJA assembler
+#            lja --reads {input.fastq} -o {out_dir} --threads {threads} >> {log} 2>&1
+
+#            # Debug: list output files
+#            echo "[INFO] Listing contents of {out_dir}" >> {log}
+#            ls -lh {out_dir} >> {log}
+
+ #           # Check expected output
+ #           if [[ ! -f {out_dir}/assembly.fasta ]]; then
+ #               echo "[ERROR] LJA did not produce assembly.fasta" >&2
+ #               echo "[ERROR] LJA did not produce assembly.fasta" >> {log}
+ #               exit 1
+ #           fi
+
+  #          # Mark completion
+  #          touch {output.done}
+#     """)
+
+
+rule lja:
+    input:
+        fastq = lambda wc: sample_paths[wc.sample]
+    output:
+        fasta = outpath("Assemblies/{sample}/LJA/assembly.fasta"),
+        done  = outpath("Assemblies/{sample}/LJA/lja.done")
+    conda:
+        "../envs/lja_env.yaml"
+    threads: 32
+    log:
+        outpath("Assemblies/{sample}/LJA/lja.log")
+
+    run:
+        out_dir = outpath(f"Assemblies/{wildcards.sample}/LJA")
+
+        cmd = f"""
+        set -euo pipefail
+
+        echo "[INFO] Running LJA for sample {wildcards.sample}" > {log}
+
+        # Run LJA assembler
+        lja --reads {input.fastq} -o {out_dir} --threads {threads} >> {log} 2>&1
+
+        # Debug: list output files
+        echo "[INFO] Listing contents of {out_dir}" >> {log}
+        ls -lh {out_dir} >> {log}
+
+        # Check expected output
+        if [[ ! -f {out_dir}/assembly.fasta ]]; then
+            echo "[ERROR] LJA did not produce assembly.fasta" >&2
+            echo "[ERROR] LJA did not produce assembly.fasta" >> {log}
+            exit 1
+        fi
+
+        # Mark completion
+        touch {output.done}
+        """
+
+        shell(cmd)

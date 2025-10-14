@@ -1,14 +1,14 @@
 rule filter_hifiasm:
     input:
-        mito = "Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta",
-        hifiasm = "Assemblies/{sample}/HIFIASM/{sample}.fasta"
+        mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
+        hifiasm = outpath("Assemblies/{sample}/HIFIASM/{sample}.fasta")
     output:
-        filtered = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta",
-        paf = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf",
-        list = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list"
+        filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
+        paf = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf"),
+        list = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list")
     log:
-        out = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.log",
-        err = "Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.err"
+        out = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.log"),
+        err = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.err")
     conda:
         "../envs/hifiasm_env.yaml"
     shell:
@@ -43,18 +43,17 @@ rule filter_hifiasm:
         fi
         """
 
-
 rule filter_lja:
     input:
-        mito = "Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta",
-        asm = "Assemblies/{sample}/LJA/assembly.fasta"
+        mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
+        asm = outpath("Assemblies/{sample}/LJA/assembly.fasta")
     output:
-        filtered = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta",
-        paf = temp("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf"),
-        list = temp("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list")
+        filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
+        paf = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf")),
+        list = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list"))
     log:
-        stdout = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.log",
-        stderr = "Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.err"
+        stdout = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.log"),
+        stderr = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.err")
     conda:
         "../envs/hifiasm_env.yaml"
     threads: 24
@@ -75,7 +74,7 @@ rule filter_lja:
 
         tmpout=$(mktemp --suffix=.fasta)
         sortbyname.sh in={output.filtered} out=$tmpout overwrite=true length descending 2>> {log.stdout}
-        
+
         # Concatenate sorted and mito into a new temp final output
         final_tmp=$(mktemp --suffix=.fasta)
         cat $tmpout {input.mito} > $final_tmp
@@ -83,7 +82,6 @@ rule filter_lja:
         # Move to final output
         mv $final_tmp {output.filtered}
         rm $tmpout
-
 
         if ! grep -q '^>' {output.filtered}; then
             echo "ERROR: Output does not contain valid FASTA headers (>)" >&2

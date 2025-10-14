@@ -11,17 +11,16 @@ def get_fq2_abs(wc):
     sample = normalize_sample(wc)
     return sample_fq2[sample]
 
-
 rule smudgeplot:
     input:
         fq1 = get_fq1_abs,
         fq2 = get_fq2_abs
     log:
-        stdout = "Assemblies/{sample}/QC/smudgeplot/smudgeplot.log",
-        stderr = "Assemblies/{sample}/QC/smudgeplot/smudgeplot.err"
+        stdout = outpath("Assemblies/{sample}/QC/smudgeplot/smudgeplot.log"),
+        stderr = outpath("Assemblies/{sample}/QC/smudgeplot/smudgeplot.err")
     output:
-        done = "Assemblies/{sample}/QC/smudgeplot/smudgeplot.done",
-        outdir = directory("Assemblies/{sample}/QC/smudgeplot")
+        done = outpath("Assemblies/{sample}/QC/smudgeplot/smudgeplot.done"),
+        outdir = directory(outpath("Assemblies/{sample}/QC/smudgeplot"))
     conda:
         "../envs/smudgeplot_env.yaml"
     params:
