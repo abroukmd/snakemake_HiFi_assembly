@@ -1,0 +1,16 @@
+name: ragtag
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+channel_priority: flexible
+dependencies:
+  - python=3.9
+  - ragtag=2.1.0
+  - pysam>=0.22
+  - samtools>=1.17
+  - minimap2>=2.26
+  - bwa>=0.7.17
+  - htslib>=1.17
+  - libgcc-ng>=12
+  - curl>=7.88

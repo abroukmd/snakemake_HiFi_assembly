@@ -1,5 +1,5 @@
 #############################################
-# Snakefile — HiFi Assembly (Refactored)
+# Snakefile — HiFi Assembly
 #############################################
 
 import pandas as pd
@@ -42,10 +42,17 @@ sample_refs = dict(zip(samples_df["sample"], samples_df["Ref"]))
 sample_fq1 = dict(zip(samples_df["sample"], samples_df["fq1"]))
 sample_fq2 = dict(zip(samples_df["sample"], samples_df["fq2"]))
 
+# Optional: RagTag flag
+if "ragtag" in samples_df.columns:
+    RAGTAG_SAMPLES = samples_df.query("ragtag == 'Y'")["sample"].tolist()
+else:
+    RAGTAG_SAMPLES = []
+
 # Export globally
 globals().update({
     "sample_fq1": sample_fq1,
-    "sample_fq2": sample_fq2
+    "sample_fq2": sample_fq2,
+    "RAGTAG_SAMPLES": RAGTAG_SAMPLES
 })
 
 # Check that all required input files exist
@@ -81,10 +88,12 @@ include: "rules/annotation.smk"
 include: "rules/postqc.smk"
 include: "rules/chromeister.smk"
 include: "rules/merqury.smk"
+include: "rules/ragtag.smk"
+include: "rules/chromeister_ragtag.smk"
 # include: "rules/multiqc.smk"
 
 # ──────────────────────────────────────────────────
-# Final target rule (now using project_dir)
+# Final target rule
 # ──────────────────────────────────────────────────
 
 rule all:
@@ -123,6 +132,17 @@ rule all:
         expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done"), sample=SAMPLES),
+
+        # RagTag (only for selected samples)
+        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.fasta"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.fasta"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.done"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.done"), sample=RAGTAG_SAMPLES),
+
+        # Chromeister on RagTag outputs (only for samples with RagTag = 'Y')
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.hifiasm.done"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.lja.done"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG_COMPARE/.compare.done"), sample=RAGTAG_SAMPLES)
 
         # multiQC (optional)
         # outpath("Assemblies/multiqc/multiqc.done")
