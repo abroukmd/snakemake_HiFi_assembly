@@ -38,9 +38,9 @@ if missing:
 
 samples = samples_df["sample"].tolist()
 sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
-sample_refs = dict(zip(samples_df["sample"], samples_df["Ref"]))
-sample_fq1 = dict(zip(samples_df["sample"], samples_df["fq1"]))
-sample_fq2 = dict(zip(samples_df["sample"], samples_df["fq2"]))
+sample_refs  = dict(zip(samples_df["sample"], samples_df["Ref"]))
+sample_fq1   = dict(zip(samples_df["sample"], samples_df["fq1"]))
+sample_fq2   = dict(zip(samples_df["sample"], samples_df["fq2"]))
 
 # Optional: RagTag flag
 if "ragtag" in samples_df.columns:
@@ -48,14 +48,15 @@ if "ragtag" in samples_df.columns:
 else:
     RAGTAG_SAMPLES = []
 
-# Export globally
+print("RAGTAG_SAMPLES =", RAGTAG_SAMPLES)
+
 globals().update({
     "sample_fq1": sample_fq1,
     "sample_fq2": sample_fq2,
     "RAGTAG_SAMPLES": RAGTAG_SAMPLES
 })
 
-# Check that all required input files exist
+# Validate existence of essential files
 for s in samples:
     for path in [sample_paths[s], sample_fq1[s], sample_fq2[s]]:
         if not Path(path).is_file():
@@ -68,8 +69,6 @@ for s in samples:
             raise FileNotFoundError(f"Input file not found for sample {s}: {path}")
 
 def reference_from_tsv(sample):
-    if sample not in sample_refs:
-        raise ValueError(f"Reference genome not found for sample {sample} in sample sheet")
     return sample_refs[sample]
 
 SAMPLES = samples
@@ -80,18 +79,15 @@ PLOIDIES = [1, 2, 3, 4]
 # ──────────────────────────────────────────────────
 
 include: "rules/qc.smk"
-#include: "rules/smudgeplot.smk"
 include: "rules/assembly.smk"
 include: "rules/purge_dups.smk"
 include: "rules/oatk.smk"
-#include: "rules/filtering.smk"
 include: "rules/annotation.smk"
 include: "rules/postqc.smk"
 include: "rules/chromeister.smk"
 include: "rules/merqury.smk"
 include: "rules/ragtag.smk"
 include: "rules/chromeister_ragtag.smk"
-# include: "rules/multiqc.smk"
 
 # ──────────────────────────────────────────────────
 # Final target rule
@@ -102,7 +98,7 @@ rule all:
         # QC outputs
         expand(outpath("Assemblies/{sample}/QC/nanoplot"), sample=SAMPLES),
 
-        # OATK output
+        # OATK
         expand(outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"), sample=SAMPLES),
 
         # Assemblies
@@ -116,79 +112,17 @@ rule all:
 
         # Post QC
         expand(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/QC/BUSCO-purged/busco_purged.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/QUAST/quast.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=SAMPLES),
 
-        # Chromeister on Hifiasm (ALL samples)
+        # Chromeister (all samples)
         expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
 
-        # RagTag scaffolding (ONLY samples with ragtag = Y)
-        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"),
-               sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"),
-               sample=RAGTAG_SAMPLES),
+        # RagTag: ONLY samples with ragtag == Y
+        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"), sample=RAGTAG_SAMPLES),
 
-        # Chromeister on RagTag (ONLY ragtag = Y)
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"),
-               sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.hifiasm.done"),
-               sample=RAGTAG_SAMPLES)
-
-
-
-#rule all:
-#    input:
-#        # QC outputs
-#        expand(outpath("Assemblies/{sample}/QC/nanoplot"), sample=SAMPLES),
-#
-#        # OATK output
-#        expand(outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"), sample=SAMPLES),
-#
-#        # Assemblies
-#        expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=SAMPLES),
-#        #expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=SAMPLES),
-#
-#        # Telosearch
-#        expand(outpath("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta"), sample=SAMPLES),
-#
-# #       # Filtered assemblies
-# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"), sample=SAMPLES),
-# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf"), sample=SAMPLES),
-# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list"), sample=SAMPLES),
-# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"), sample=SAMPLES),
-# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf"), sample=SAMPLES),
-# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list"), sample=SAMPLES),
-#
-#        # rRNA annotation
-#        expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=SAMPLES),
-#
-#        # Post QC
-#        expand(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"), sample=SAMPLES),
-#        expand(outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"), sample=SAMPLES),
-#        expand(outpath("Assemblies/{sample}/QC/QUAST/quast.done"), sample=SAMPLES),
-#        expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=SAMPLES),
-#
-#        # Chromeister
-#        expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
-##        expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=SAMPLES),
-##        expand(outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done"), sample=SAMPLES),
-#
-#        # RagTag (only for selected samples)
-#        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.fasta"), sample=RAGTAG_SAMPLES),
-##        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.fasta"), sample=RAGTAG_SAMPLES),
-#        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.done"), sample=RAGTAG_SAMPLES),
-##        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.done"), sample=RAGTAG_SAMPLES),
-#
-#        # Purged RagTag
-#        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"), sample=SAMPLES),
-#
-#        # Chromeister on RagTag outputs (only for samples with RagTag = 'Y')
-#        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.hifiasm.done"), sample=RAGTAG_SAMPLES),
-#        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"), sample=SAMPLES)
-#        #expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.lja.done"), sample=RAGTAG_SAMPLES),
-#        #expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG_COMPARE/.compare.done"), sample=RAGTAG_SAMPLES)
-#
-#        # multiQC (optional)
-#        # outpath("Assemblies/multiqc/multiqc.done")
-#
+        # Chromeister on RagTag: ONLY samples with ragtag == Y
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done"), sample=RAGTAG_SAMPLES)
