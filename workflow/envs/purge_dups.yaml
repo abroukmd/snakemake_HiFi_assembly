@@ -1,0 +1,8 @@
+name: purge_dups
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - purge_dups
+  - samtools
+  - minimap2

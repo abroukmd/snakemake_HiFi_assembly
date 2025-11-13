@@ -1,16 +1,16 @@
 rule barrnap:
     input:
         asm_hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
-        asm_lja     = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
+        #asm_lja     = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
         hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"),
-        lja_done     = outpath("Assemblies/{sample}/LJA/lja.done")
+        #lja_done     = outpath("Assemblies/{sample}/LJA/lja.done")
     output:
         gff3_hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-barrnap-hifiasm.gff3"),
-        gff3_lja     = outpath("Assemblies/{sample}/FILTERED/{sample}-barrnap-lja.gff3"),
+        #gff3_lja     = outpath("Assemblies/{sample}/FILTERED/{sample}-barrnap-lja.gff3"),
         done         = outpath("Assemblies/{sample}/FILTERED/barrnap.done")
     log:
         barrnap_hifiasm_log  =   outpath("Assemblies/{sample}/FILTERED/barrnap/barrnap_hifiasm.log"),
-        barrnap_lja_log  =   outpath("Assemblies/{sample}/FILTERED/barrnap/barrnap_lja.log")
+        #barrnap_lja_log  =   outpath("Assemblies/{sample}/FILTERED/barrnap/barrnap_lja.log")
     conda:
         "../envs/barrnap_env.yaml"
     shell:
@@ -18,7 +18,7 @@ rule barrnap:
         set -euo pipefail
 
         barrnap --kingdom euk --threads 8 < {input.asm_hifiasm} > {output.gff3_hifiasm} 2>&1 | tee {log.barrnap_hifiasm_log}
-        barrnap --kingdom euk --threads 8 < {input.asm_lja} > {output.gff3_lja} 2>&1 | tee {log.barrnap_lja_log}
+        #barrnap --kingdom euk --threads 8 < {input.asm_lja} > {output.gff3_lja} 2>&1 | tee {log.barrnap_lja_log}
 
         touch {output.done}
         """

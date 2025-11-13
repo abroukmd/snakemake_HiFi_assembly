@@ -82,8 +82,9 @@ PLOIDIES = [1, 2, 3, 4]
 include: "rules/qc.smk"
 #include: "rules/smudgeplot.smk"
 include: "rules/assembly.smk"
+include: "rules/purge_dups.smk"
 include: "rules/oatk.smk"
-include: "rules/filtering.smk"
+#include: "rules/filtering.smk"
 include: "rules/annotation.smk"
 include: "rules/postqc.smk"
 include: "rules/chromeister.smk"
@@ -106,18 +107,9 @@ rule all:
 
         # Assemblies
         expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=SAMPLES),
 
         # Telosearch
         expand(outpath("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta"), sample=SAMPLES),
-
-        # Filtered assemblies
-        expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list"), sample=SAMPLES),
 
         # rRNA annotation
         expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=SAMPLES),
@@ -128,21 +120,75 @@ rule all:
         expand(outpath("Assemblies/{sample}/QC/QUAST/quast.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=SAMPLES),
 
-        # Chromeister
+        # Chromeister on Hifiasm (ALL samples)
         expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done"), sample=SAMPLES),
 
-        # RagTag (only for selected samples)
-        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.fasta"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.fasta"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.done"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.done"), sample=RAGTAG_SAMPLES),
+        # RagTag scaffolding (ONLY samples with ragtag = Y)
+        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"),
+               sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"),
+               sample=RAGTAG_SAMPLES),
 
-        # Chromeister on RagTag outputs (only for samples with RagTag = 'Y')
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.hifiasm.done"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.lja.done"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG_COMPARE/.compare.done"), sample=RAGTAG_SAMPLES)
+        # Chromeister on RagTag (ONLY ragtag = Y)
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"),
+               sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.hifiasm.done"),
+               sample=RAGTAG_SAMPLES)
 
-        # multiQC (optional)
-        # outpath("Assemblies/multiqc/multiqc.done")
+
+
+#rule all:
+#    input:
+#        # QC outputs
+#        expand(outpath("Assemblies/{sample}/QC/nanoplot"), sample=SAMPLES),
+#
+#        # OATK output
+#        expand(outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"), sample=SAMPLES),
+#
+#        # Assemblies
+#        expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=SAMPLES),
+#        #expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=SAMPLES),
+#
+#        # Telosearch
+#        expand(outpath("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta"), sample=SAMPLES),
+#
+# #       # Filtered assemblies
+# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"), sample=SAMPLES),
+# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf"), sample=SAMPLES),
+# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list"), sample=SAMPLES),
+# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"), sample=SAMPLES),
+# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf"), sample=SAMPLES),
+# #       expand(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list"), sample=SAMPLES),
+#
+#        # rRNA annotation
+#        expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=SAMPLES),
+#
+#        # Post QC
+#        expand(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"), sample=SAMPLES),
+#        expand(outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"), sample=SAMPLES),
+#        expand(outpath("Assemblies/{sample}/QC/QUAST/quast.done"), sample=SAMPLES),
+#        expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=SAMPLES),
+#
+#        # Chromeister
+#        expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
+##        expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=SAMPLES),
+##        expand(outpath("Assemblies/{sample}/CHROMEISTER_COMPARE/.compare.done"), sample=SAMPLES),
+#
+#        # RagTag (only for selected samples)
+#        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.fasta"), sample=RAGTAG_SAMPLES),
+##        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.fasta"), sample=RAGTAG_SAMPLES),
+#        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_hifiasm.done"), sample=RAGTAG_SAMPLES),
+##        expand(outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_lja.done"), sample=RAGTAG_SAMPLES),
+#
+#        # Purged RagTag
+#        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"), sample=SAMPLES),
+#
+#        # Chromeister on RagTag outputs (only for samples with RagTag = 'Y')
+#        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.hifiasm.done"), sample=RAGTAG_SAMPLES),
+#        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"), sample=SAMPLES)
+#        #expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.lja.done"), sample=RAGTAG_SAMPLES),
+#        #expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG_COMPARE/.compare.done"), sample=RAGTAG_SAMPLES)
+#
+#        # multiQC (optional)
+#        # outpath("Assemblies/multiqc/multiqc.done")
+#
