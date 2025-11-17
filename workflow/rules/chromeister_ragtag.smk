@@ -12,7 +12,7 @@ RAGTAG_SAMPLES = samples_df.query("ragtag == 'Y'").index.tolist()
 ##############################################
 rule chromeister_ragtag_purged:
     input:
-        asm = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"),
+        asm = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.reforder.fasta"),
         ref = lambda wc: samples_df.loc[wc.sample, "Ref"],
         ragtag_done = outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_purged.done")
     output:
