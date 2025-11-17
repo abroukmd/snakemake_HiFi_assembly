@@ -1,4 +1,4 @@
 project_dir: "/data3/u0176926/PacBio_Oct2025/"
-sample_sheet: "config/samples.tsv"
+sample_sheet: "/data1/u0176926/snakemake/HIFI_assembly/config/samples.tsv"
 oatk_db: "/data1/u0176926/snakemake/HIFI_pipeline/DB/OATK_DB/Dikarya.fam"
 singularity_args: "--bind /data1"

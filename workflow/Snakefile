@@ -7,6 +7,8 @@ from pathlib import Path
 import os
 import sys
 
+workdir: config["project_dir"]
+
 # ──────────────────────────────────────────────────
 # Validate and load config
 # ──────────────────────────────────────────────────
@@ -124,5 +126,5 @@ rule all:
         expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"), sample=RAGTAG_SAMPLES),
 
         # Chromeister on RagTag: ONLY samples with ragtag == Y
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"), sample=RAGTAG_SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.filt.png"), sample=RAGTAG_SAMPLES),
         expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done"), sample=RAGTAG_SAMPLES)

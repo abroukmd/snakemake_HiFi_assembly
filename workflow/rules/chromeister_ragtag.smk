@@ -17,7 +17,7 @@ rule chromeister_ragtag_purged:
         ragtag_done = outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_purged.done")
     output:
         mat   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat"),
-        png   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.png"),
+        png   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.filt.png"),
         score = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag_score.txt"),
         done  = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done")
     log:
@@ -25,7 +25,7 @@ rule chromeister_ragtag_purged:
         err = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.err")
     conda:
         "../envs/chromeister_env.yaml"
-    threads: 2
+    threads: 1
     wildcard_constraints:
         sample="|".join(RAGTAG_SAMPLES)
     shell:
