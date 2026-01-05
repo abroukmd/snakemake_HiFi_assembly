@@ -102,6 +102,6 @@ Barrnap, Chromeister, MultiQC.
 
 ##  Contact
 
-Verstrepen Lab — KU Leuven
-https://verstrepenlab.sites.vib.be/en
-Contact: michael.abrouk@kuleuven.be
+Verstrepen Lab — KU Leuven  
+https://verstrepenlab.sites.vib.be/en  
+Contact: **michael.abrouk@kuleuven.be**
