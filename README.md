@@ -1,6 +1,6 @@
 # snakemake_HiFi_assembly
 
-![HiFi assembly workflow](hifi_assembly_pipeline.png)
+![HiFi assembly workflow](hifi_assembly_pipeline2.png)
 
 Snakemake workflow for **de novo genome assembly from PacBio HiFi reads**, including
 assembly, duplicate purging, reference-guided scaffolding, and extensive quality control.
