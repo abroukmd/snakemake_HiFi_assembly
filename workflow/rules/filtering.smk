@@ -3,12 +3,17 @@ rule filter_hifiasm:
         mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
         hifiasm = outpath("Assemblies/{sample}/HIFIASM/{sample}.fasta")
     output:
-        filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
-        paf = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf"),
-        list = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list")
+        #filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
+        filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-hifiasm.fasta"),
+        paf = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-hifiasm.fasta.paf"),
+        list = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-hifiasm.fasta.list")
+        #paf = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.paf"),
+        #list = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta.list")
     log:
-        out = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.log"),
-        err = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.err")
+        out = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-hifiasm.log"),
+        err = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-hifiasm.err")
+        #out = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.log"),
+        #err = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.err")
     conda:
         "../envs/hifiasm_env.yaml"
     shell:
@@ -48,12 +53,17 @@ rule filter_lja:
         mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
         asm = outpath("Assemblies/{sample}/LJA/assembly.fasta")
     output:
-        filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
-        paf = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf")),
-        list = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list"))
+        filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-lja.fasta"),
+        paf = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-lja.fasta.paf")),
+        list = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-lja.fasta.list")),
+        #filtered = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta"),
+        #paf = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.paf")),
+        #list = temp(outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.fasta.list"))
     log:
-        stdout = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.log"),
-        stderr = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.err")
+        stdout = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-lja.log"),
+        stderr = outpath("Assemblies/{sample}/FILTERED/{sample}-filtered-lja.err"),
+        #stdout = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.log"),
+        #stderr = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-lja.err")
     conda:
         "../envs/hifiasm_env.yaml"
     threads: 24

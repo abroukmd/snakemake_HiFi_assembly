@@ -2,10 +2,9 @@ import pandas as pd
 
 samples = pd.read_csv(config["sample_sheet"], sep="\t", index_col="sample").to_dict(orient="index")
 
-
 rule chromeister_hifiasm:
     input:
-        query = get_purged_hifiasm_or_original,
+        query = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
         ref = lambda wc: samples[wc.sample]["Ref"],
         hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done")
     output:

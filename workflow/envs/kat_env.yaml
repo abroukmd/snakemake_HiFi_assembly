@@ -1,0 +1,7 @@
+name: kat
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - kat=2.4.2
+  - python=3.9

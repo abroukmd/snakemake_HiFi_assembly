@@ -1,6 +1,6 @@
 rule barrnap:
     input:
-        asm_hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-HIFI-hifiasm.fasta"),
+        asm_hifiasm = get_purged_hifiasm_or_original,
         hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done")
     output:
         gff3_hifiasm = outpath("Assemblies/{sample}/FILTERED/{sample}-barrnap-hifiasm.gff3"),

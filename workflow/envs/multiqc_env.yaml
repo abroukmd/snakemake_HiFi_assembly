@@ -1,6 +1,11 @@
-name: multiqc
+name: mapping_qc
 channels:
-  - conda-forge
   - bioconda
+  - conda-forge
+  - defaults
+
 dependencies:
-  - multiqc
+  - python
+  - bwa
+  - samtools
+

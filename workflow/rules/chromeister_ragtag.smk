@@ -69,3 +69,83 @@ rule chromeister_ragtag_purged:
 
         touch "{output.done}"
         """
+
+
+##############################################
+#   Chromeister on Purged RagTag LJA Assembly
+##############################################
+
+rule chromeister_ragtag_lja:
+    input:
+        asm = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.reforder.fasta"),
+        ref = lambda wc: samples_df.loc[wc.sample, "Ref"],
+        ragtag_done = outpath("Assemblies/{sample}/RAGTAG_LJA/{sample}_ragtag_lja.done")
+    output:
+        mat   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat"),
+        png   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat.filt.png"),
+        score = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag_score.txt"),
+        done  = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_lja_ragtag.done")
+    log:
+        out = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.log"),
+        err = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.err")
+    conda:
+        "../envs/chromeister_env.yaml"
+    threads: 1
+    wildcard_constraints:
+        sample="|".join(RAGTAG_SAMPLES)
+    shell:
+        r"""
+        set -euo pipefail
+
+        OUTDIR=$(dirname {output.mat})
+        mkdir -p "$OUTDIR"
+
+        # ---------------------------------
+        # Resolve the sorted RagTag assembly
+        # ---------------------------------
+        ASM_ABS=$(realpath {input.asm}) \
+            || {{ echo "[ERROR] Missing assembly: {input.asm}" >&2; exit 1; }}
+
+        # ---------------------------------
+        # Prepare reference (handle .gz)
+        # ---------------------------------
+        REF_FILE="{input.ref}"
+        if [[ "$REF_FILE" == *.gz ]]; then
+            BASENAME=$(basename "$REF_FILE" .gz)
+            gunzip -c "$REF_FILE" > "$OUTDIR/$BASENAME"
+            REF_FILE="$OUTDIR/$BASENAME"
+        fi
+
+        echo "[INFO] Running Chromeister on LJA RagTag assembly" >> {log.out}
+
+        # ---------------------------------
+        # Chromeister alignment
+        # ---------------------------------
+        CHROMEISTER -query "$REF_FILE" \
+                    -db "$ASM_ABS" \
+                    -out "{output.mat}" \
+                    -dimension 2000 \
+                    >> "{log.out}" 2>> "{log.err}"
+
+        # ---------------------------------
+        # Compute score
+        # ---------------------------------
+        Rscript $(which compute_score.R) "{output.mat}" 2000 \
+            > "{output.score}" 2>> "{log.err}"
+
+        # ---------------------------------
+        # Collect PNG if generated
+        # ---------------------------------
+        if [[ -f "{output.mat}.png" ]]; then
+            mv "{output.mat}.png" "{output.png}"
+        fi
+
+        # ---------------------------------
+        # Cleanup temporary reference
+        # ---------------------------------
+        if [[ "$REF_FILE" == "$OUTDIR/"* ]]; then
+            rm -f "$REF_FILE"
+        fi
+
+        touch "{output.done}"
+        """
