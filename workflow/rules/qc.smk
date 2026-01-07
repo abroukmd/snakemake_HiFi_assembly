@@ -1,19 +1,31 @@
 rule nanoplot:
     input:
         lambda wildcards: sample_paths[wildcards.sample]
+    output:
+        nanoplot_dir = directory(outpath("Assemblies/{sample}/QC/nanoplot")),
+        done          = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.done")
     log:
         stdout = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.log"),
         stderr = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.err")
-    output:
-        nanoplot_dir = directory(outpath("Assemblies/{sample}/QC/nanoplot"))
     conda:
         "../envs/nanoplot_env.yaml"
     params:
-        cores=12,
-        mem="10gb",
-        time="01:00:00"
+        cores=12
     shell:
-        "NanoPlot -o {output} -t {params.cores} --fastq {input} --maxlength 40000 --plots dot"
+        r"""
+        set -euo pipefail
+
+        NanoPlot \
+            -o {output.nanoplot_dir} \
+            -t {params.cores} \
+            --fastq {input} \
+            --maxlength 40000 \
+            --plots dot \
+            > {log.stdout} 2> {log.stderr}
+
+        touch {output.done}
+        """
+
 
 #rule jellyfish_histo:
 #    input:

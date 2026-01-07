@@ -1,0 +1,68 @@
+title: "PacBio HiFi Assembly QC"
+subtitle: "NanoPlot · BUSCO · QUAST · Merqury · Mapping"
+
+no_version_check: true
+show_analysis_paths: false
+
+###############################################################################
+# Ignore clutter
+###############################################################################
+
+ignore_dirs:
+  - HIFIASM
+  - LJA
+  - PURGE_DUPS
+  - PURGE_DUPS_LJA
+
+###############################################################################
+# Enabled native modules
+###############################################################################
+
+run_modules:
+  - busco
+  - quast
+  - samtools
+
+###############################################################################
+# Custom Merqury sections
+###############################################################################
+
+custom_content:
+
+  merqury_raw_completeness:
+    section_name: "Merqury — Raw assemblies (Completeness)"
+    description: "k-mer completeness (%)"
+    plot_type: table
+    files:
+      - "merqury/raw/raw_merqury/completeness.stats"
+
+  merqury_raw_qv:
+    section_name: "Merqury — Raw assemblies (QV)"
+    description: "Consensus QV"
+    plot_type: table
+    files:
+      - "merqury/raw/raw_merqury/raw_merqury.qv"
+
+  merqury_purged_completeness:
+    section_name: "Merqury — Purged assemblies (Completeness)"
+    plot_type: table
+    files:
+      - "merqury/purged/purged_merqury/completeness.stats"
+
+  merqury_purged_qv:
+    section_name: "Merqury — Purged assemblies (QV)"
+    plot_type: table
+    files:
+      - "merqury/purged/purged_merqury/purged_merqury.qv"
+
+  merqury_ragtag_completeness:
+    section_name: "Merqury — RagTag assemblies (Completeness)"
+    plot_type: table
+    files:
+      - "merqury/ragtag/ragtag_merqury/completeness.stats"
+
+  merqury_ragtag_qv:
+    section_name: "Merqury — RagTag assemblies (QV)"
+    plot_type: table
+    files:
+      - "merqury/ragtag/ragtag_merqury/ragtag_merqury.qv"

@@ -12,7 +12,7 @@ RAGTAG_SAMPLES = samples_df.query("ragtag == 'Y'").index.tolist()
 rule ragtag_purged:
     input:
         ref   = lambda wc: samples[wc.sample]["Ref"],
-        purge = outpath("Assemblies/{sample}/PURGE_DUPS/purged.fa")
+        purge = outpath("Assemblies/{sample}/PURGE_DUPS/purged.hifiasm.fa")
     output:
         fasta = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"),
         agp   = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.agp"),
@@ -89,7 +89,10 @@ rule ragtag_sort_by_ref:
         agp   = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.agp"),
         fasta = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta")
     output:
-        sorted = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.reforder.fasta")
+        sorted = outpath(
+            "Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/"
+            "ragtag.scaffold.hifiasm.reforder.fasta"
+        )
     threads: 2
     conda: "../envs/ragtag.yaml"
     shell:
@@ -99,57 +102,30 @@ rule ragtag_sort_by_ref:
         OUTDIR=$(dirname "{output.sorted}")
         mkdir -p "$OUTDIR"
 
-        REF="{input.ref}"
-        AGP="{input.agp}"
-        FASTA="{input.fasta}"
-
         REFORDER="$OUTDIR/ref.order.txt"
         SCAFFORDER="$OUTDIR/scaffold.order.txt"
 
-        # ----------------------------------------------------
-        # 1) Extract reference order from FASTA headers
-        #    (keep order, take first token after '>')
-        # ----------------------------------------------------
-        if [[ "$REF" == *.gz ]]; then
-            zgrep '^>' "$REF" | cut -d' ' -f1 | sed 's/^>//' > "$REFORDER"
+        if [[ "{input.ref}" == *.gz ]]; then
+            zgrep '^>' "{input.ref}" | cut -d' ' -f1 | sed 's/^>//' > "$REFORDER"
         else
-            grep  '^>' "$REF" | cut -d' ' -f1 | sed 's/^>//' > "$REFORDER"
+            grep '^>' "{input.ref}" | cut -d' ' -f1 | sed 's/^>//' > "$REFORDER"
         fi
 
-        # ----------------------------------------------------
-        # 2) Build scaffold order:
-        #    - AGP col1 = <ref>_RagTag
-        #    - strip _RagTag, match to REFORDER
-        #    - output col1 (index) and full scaffold name
-        # ----------------------------------------------------
         awk '
-            NR==FNR {{ ord[$1]=NR; next }}
-            /^#/  {{ next }}
-            $1 != prev {{
+            NR==FNR { ord[$1]=NR; next }
+            /^#/ { next }
+            $1 != prev {
                 name=$1
                 sub(/_RagTag$/, "", name)
                 if (name in ord)
                     print ord[name] "\t" $1
                 prev=$1
-            }}
-        ' "$REFORDER" "$AGP" \
-        | sort -k1,1n \
-        | cut -f2 \
-        > "$SCAFFORDER"
+            }
+        ' "$REFORDER" "{input.agp}" \
+        | sort -k1,1n | cut -f2 > "$SCAFFORDER"
 
-        if [[ ! -s "$SCAFFORDER" ]]; then
-            echo "[ERROR] scaffold.order.txt is empty for sample {wildcards.sample}" >&2
-            echo "[HINT] Check that reference IDs in $REF match AGP col1 (without _RagTag)" >&2
-            exit 1
-        fi
-
-        # ----------------------------------------------------
-        # 3) Reorder RagTag scaffold FASTA
-        # ----------------------------------------------------
-        samtools faidx "$FASTA"
-
-        samtools faidx "$FASTA" $(cat "$SCAFFORDER") \
-            > "{output.sorted}"
+        samtools faidx "{input.fasta}"
+        samtools faidx "{input.fasta}" $(cat "$SCAFFORDER") > "{output.sorted}"
         """
 
 
@@ -189,7 +165,7 @@ rule ragtag_sort_by_ref:
 rule ragtag_purged_lja:
     input:
         ref   = lambda wc: samples_df.loc[wc.sample, "Ref"],
-        purge = outpath("Assemblies/{sample}/PURGE_DUPS_LJA/purged.fa")
+        purge = outpath("Assemblies/{sample}/PURGE_DUPS_LJA/purged.lja.fa")
     output:
         fasta = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.fasta"),
         agp   = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.agp"),
@@ -236,7 +212,11 @@ rule ragtag_sort_by_ref_lja:
         agp   = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.agp"),
         fasta = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.fasta")
     output:
-        sorted = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.reforder.fasta")
+        sorted = outpath(
+            "Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/"
+            "ragtag.scaffold.lja.reforder.fasta"
+        )
+    conda: "../envs/ragtag.yaml"
     shell:
         r"""
         set -euo pipefail
@@ -254,19 +234,17 @@ rule ragtag_sort_by_ref_lja:
         fi
 
         awk '
-            NR==FNR {{ ord[$1]=NR; next }}
-            /^#/ {{ next }}
-            $1 != prev {{
+            NR==FNR { ord[$1]=NR; next }
+            /^#/ { next }
+            $1 != prev {
                 name=$1
                 sub(/_RagTag$/, "", name)
                 if (name in ord)
                     print ord[name] "\t" $1
                 prev=$1
-            }}
+            }
         ' "$REFORDER" "{input.agp}" \
-        | sort -k1,1n \
-        | cut -f2 \
-        > "$SCAFFORDER"
+        | sort -k1,1n | cut -f2 > "$SCAFFORDER"
 
         samtools faidx "{input.fasta}"
         samtools faidx "{input.fasta}" $(cat "$SCAFFORDER") > "{output.sorted}"

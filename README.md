@@ -88,7 +88,7 @@ sample_sheet: "config/sample_sheet.tsv"
 ##  Running the Workflow
 
 ```bash
-snakemake --use-conda --cores 32 --configfile config/config.yaml
+snakemake --use-conda --cores 52 --printshellcmds --latency-wait 30 --keep-going --rerun-incomplete --configfile config/config.yaml
 ```
 
 ---

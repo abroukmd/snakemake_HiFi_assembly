@@ -7,6 +7,10 @@ from pathlib import Path
 import os
 import sys
 
+# ──────────────────────────────────────────────────
+# Working directory
+# ──────────────────────────────────────────────────
+
 workdir: config["project_dir"]
 
 # ──────────────────────────────────────────────────
@@ -25,40 +29,27 @@ project_dir = os.path.abspath(project_dir)
 os.makedirs(project_dir, exist_ok=True)
 
 def outpath(*parts):
-    """Helper to construct absolute paths under project_dir."""
     return os.path.join(project_dir, *parts)
 
-def get_purged_hifiasm_or_original(wc):
-    sample = normalize_sample(wc)
-    if sample in RAGTAG_SAMPLES:
-        return outpath(f"Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.reforder.fasta")
-    else:
-        return outpath(f"Assemblies/{sample}/HIFIASM/{sample}.fasta")
-
-def get_purged_lja_or_original(wc):
-    sample = normalize_sample(wc)
-    if sample in RAGTAG_SAMPLES:
-        return outpath(f"Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.reforder.fasta")
-    else:
-        return outpath(f"Assemblies/{sample}/LJA/assembly.fasta")
-
 # ──────────────────────────────────────────────────
-# Load sample metadata and validate presence of all listed files
+# Load sample metadata
 # ──────────────────────────────────────────────────
 
 samples_df = pd.read_csv(sample_sheet, sep="\t")
+
 required_columns = {"sample", "HiFi", "Ref", "fq1", "fq2"}
 missing = required_columns - set(samples_df.columns)
 if missing:
     raise ValueError(f"Missing columns in sample sheet: {missing}")
 
-samples = samples_df["sample"].tolist()
+SAMPLES = samples_df["sample"].tolist()
+
 sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
 sample_refs  = dict(zip(samples_df["sample"], samples_df["Ref"]))
 sample_fq1   = dict(zip(samples_df["sample"], samples_df["fq1"]))
 sample_fq2   = dict(zip(samples_df["sample"], samples_df["fq2"]))
 
-# Optional: RagTag flag
+# Optional RagTag flag
 if "ragtag" in samples_df.columns:
     RAGTAG_SAMPLES = samples_df.query("ragtag == 'Y'")["sample"].tolist()
 else:
@@ -69,56 +60,51 @@ print("RAGTAG_SAMPLES =", RAGTAG_SAMPLES)
 globals().update({
     "sample_fq1": sample_fq1,
     "sample_fq2": sample_fq2,
+    "sample_refs": sample_refs,
     "RAGTAG_SAMPLES": RAGTAG_SAMPLES
 })
 
-# Validate existence of essential files
-for s in samples:
+# Validate existence of raw input files
+for s in SAMPLES:
     for path in [sample_paths[s], sample_fq1[s], sample_fq2[s]]:
         if not Path(path).is_file():
-            print(f"[ERROR] Missing input file for sample {s}: {path}")
-            dir_path = Path(path).parent
-            if dir_path.exists():
-                print(f"[DEBUG] Contents of {dir_path}:")
-                for p in sorted(dir_path.glob('*')):
-                    print(f"  - {p.name}")
-            raise FileNotFoundError(f"Input file not found for sample {s}: {path}")
-
-def reference_from_tsv(sample):
-    return sample_refs[sample]
-
-SAMPLES = samples
-PLOIDIES = [1, 2, 3, 4]
+            raise FileNotFoundError(f"Missing input file for sample {s}: {path}")
 
 # ──────────────────────────────────────────────────
-# Include modular rule files
+# Include rule modules
+# ORDER IS IMPORTANT
 # ──────────────────────────────────────────────────
+
 include: "accessors.smk"
+
 include: "rules/qc.smk"
 include: "rules/assembly.smk"
 include: "rules/purge_dups.smk"
 include: "rules/oatk.smk"
+include: "rules/filtering.smk"
 include: "rules/annotation.smk"
 include: "rules/postqc.smk"
 include: "rules/chromeister.smk"
-#include: "rules/merqury.smk"
-include: "rules/ragtag.smk"
-include: "rules/chromeister_ragtag.smk"
-#include: "rules/ploidy_plot.smk"
 
+include: "rules/ragtag.smk"      # must precede Merqury
+include: "rules/merqury.smk"     # Solution B summaries
+include: "rules/chromeister_ragtag.smk"
+
+# include: "rules/ploidy_plot.smk"
 
 # ──────────────────────────────────────────────────
 # Final target rule
 # ──────────────────────────────────────────────────
+
 rule all:
     input:
-        # nanoplot
+        # Pre-QC
         expand(outpath("Assemblies/{sample}/QC/nanoplot"), sample=SAMPLES),
 
         # OATK
         expand(outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"), sample=SAMPLES),
 
-        # Hifiasm + LJA assemblies
+        # Assemblies
         expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=SAMPLES),
 
@@ -128,7 +114,7 @@ rule all:
         # Barrnap
         expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=SAMPLES),
 
-        # BUSCO on Hifiasm + LJA
+        # BUSCO
         expand(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"), sample=SAMPLES),
 
@@ -138,23 +124,45 @@ rule all:
         # Mapping QC
         expand(outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done"), sample=SAMPLES),
 
-        # MultiQC
-#        expand(outpath("Assemblies/{sample}/QC/multiqc/multiqc.done"), sample=SAMPLES),
-
-        # Chromeister
+        # Chromeister (raw)
         expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=SAMPLES),
 
-        # Ploidy plots
-#        expand(outpath("Assemblies/{sample}/Ploidy_plots/{asm}_ploidy_plot.pdf"), sample=SAMPLES, asm=["hifiasm", "lja"]),
+        # Merqury (FINAL QC TARGET)
+        expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=SAMPLES),
 
-        # ONLY RAGTAG SAMPLES
-        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.reforder.fasta"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"), sample=RAGTAG_SAMPLES),
-#        expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.filt.png"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat.filt.png"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_lja_ragtag.done"), sample=RAGTAG_SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done"), sample=RAGTAG_SAMPLES)
+        # MultiQC (FINAL QC AGGREGATION)
+        expand(outpath("Assemblies/{sample}/QC/multiqc/multiqc.done"), sample=SAMPLES),
+
+        # ─────────────────────────────────────────────
+        # RagTag-only targets
+        # ─────────────────────────────────────────────
+        
+        expand(
+            outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.hifiasm.reforder.fasta"),
+            sample=RAGTAG_SAMPLES
+        ),
+        #expand(
+        #    outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"),
+        #    sample=RAGTAG_SAMPLES
+        #),
+        expand(
+            outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.lja.reforder.fasta"),
+            sample=RAGTAG_SAMPLES
+        ),
+        expand(
+         outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"),
+            sample=RAGTAG_SAMPLES
+        ),
+        expand(
+            outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"),
+            sample=RAGTAG_SAMPLES
+        ),
+        expand(
+            outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done"),
+            sample=RAGTAG_SAMPLES
+        ),
+        expand(
+            outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_lja_ragtag.done"),
+            sample=RAGTAG_SAMPLES
+        )

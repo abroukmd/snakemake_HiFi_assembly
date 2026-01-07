@@ -188,19 +188,23 @@ rule mapping_qc:
 #######################################################################
 rule multiqc_sample:
     input:
-        quast      = outpath("Assemblies/{sample}/QC/QUAST/quast.done"),
-        busco_hif  = outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"),
-        busco_lja  = outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"),
-        busco_phif = outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"),
-        busco_plja = outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"),
-        mapping    = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done"),
-        merqury    = outpath("Assemblies/{sample}/QC/merqury/merqury.done")
+        nanoplot  = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.done"),
+        quast     = outpath("Assemblies/{sample}/QC/QUAST/quast.done"),
+        busco_hif = outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"),
+        busco_lja = outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"),
+        busco_ph  = outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"),
+        busco_pl  = outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"),
+        mapping   = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done"),
+        merqury   = outpath("Assemblies/{sample}/QC/merqury/merqury.done")
     output:
         report = outpath("Assemblies/{sample}/QC/multiqc/multiqc_report.html"),
         done   = outpath("Assemblies/{sample}/QC/multiqc/multiqc.done")
     log:
         out = outpath("Assemblies/{sample}/QC/multiqc/multiqc.log"),
         err = outpath("Assemblies/{sample}/QC/multiqc/multiqc.err")
+    params:
+        qcdir = lambda wc: outpath(f"Assemblies/{wc.sample}/QC"),
+        config = lambda wc: os.path.join(workflow.basedir, "envs/multiqc_config.yaml")
     conda:
         "../envs/multiqc_env.yaml"
     threads: 12
@@ -211,14 +215,20 @@ rule multiqc_sample:
         OUTDIR=$(dirname {output.report})
         mkdir -p "$OUTDIR"
 
-        SAMPLE_QC_DIR=$(realpath {outpath("Assemblies/{sample}/QC")})
+        SAMPLE_QC_DIR=$(realpath {params.qcdir})
+        MULTIQC_CONFIG={params.config}
 
-        echo "[INFO] Running MultiQC on QC folder" >> {log.out}
+        echo "[INFO] Running MultiQC on $SAMPLE_QC_DIR" >> {log.out}
+        echo "[INFO] Using config $MULTIQC_CONFIG" >> {log.out}
 
         multiqc "$SAMPLE_QC_DIR" \
+            --config "$MULTIQC_CONFIG" \
+            --force \
             --outdir "$OUTDIR" \
             --filename multiqc_report.html \
             >> {log.out} 2>> {log.err}
 
         touch {output.done}
         """
+
+
