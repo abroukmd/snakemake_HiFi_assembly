@@ -5,7 +5,7 @@ samples = pd.read_csv(config["sample_sheet"], sep="\t", index_col="sample").to_d
 
 rule chromeister_hifiasm:
     input:
-        query = get_purged_hifiasm_or_original,
+        query = get_asm_hifiasm_abs,
         ref = lambda wc: samples[wc.sample]["Ref"],
         hifiasm_done = outpath("Assemblies/{sample}/HIFIASM/hifiasm.done")
     output:
@@ -50,7 +50,7 @@ rule chromeister_hifiasm:
 
 rule chromeister_lja:
     input:
-        query = get_purged_lja_or_original,
+        query = get_asm_lja_abs,
         ref   = lambda wc: samples[wc.sample]["Ref"],
         lja_done = outpath("Assemblies/{sample}/LJA/lja.done")
     output:
@@ -98,3 +98,6 @@ rule chromeister_lja:
 
         touch "{output.done}"
         """
+
+
+        

@@ -1,157 +1,142 @@
 #######################################################################
-# POSTQC (BUSCO, QUAST, MAPPING, MULTIQC)
-#
-# This module now uses ONLY the unified accessors from accessors.smk:
-#
-#   get_asm_hifiasm_abs(sample)
-#   get_asm_lja_abs(sample)
-#   get_purged_hifiasm(wc)
-#   get_purged_lja(wc)
-#
-#######################################################################
-
-#######################################################################
-# BUSCO (raw + purged assemblies)
+# POSTQC (BUSCO, QUAST, MAPPING)
+# Uses final mito-updated assemblies for downstream QC.
 #######################################################################
 include: "../accessors.smk"
 
 rule busco_hifiasm:
     input:
-        lambda wc: get_asm_hifiasm_abs(wc)
+        assembly = get_asm_hifiasm_abs
     output:
-        dir  = directory(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/{sample}-hifiasm")),
-        done = outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done")
+        outdir = directory(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/{sample}-hifiasm")),
+        done   = outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done")
     log:
         out = outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.log")
-    conda: "../envs/busco_env.yaml"
+    conda:
+        "../envs/busco_env.yaml"
     threads: 32
     shell:
-        """
+        r"""
+        set -euo pipefail
         mkdir -p $(dirname {output.done})
-        busco -i {input} -o {wildcards.sample}-hifiasm \
+        busco -i {input.assembly} -o {wildcards.sample}-hifiasm \
               -m geno -c {threads} --auto-lineage-euk \
-              --out_path $(dirname {output.dir}) \
+              --out_path $(dirname {output.outdir}) \
               &> {log.out}
         touch {output.done}
         """
-
 
 rule busco_lja:
     input:
-        lambda wc: get_asm_lja_abs(wc)
+        assembly = get_asm_lja_abs
     output:
-        dir  = directory(outpath("Assemblies/{sample}/QC/BUSCO-lja/{sample}-lja")),
-        done = outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done")
+        outdir = directory(outpath("Assemblies/{sample}/QC/BUSCO-lja/{sample}-lja")),
+        done   = outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done")
     log:
         out = outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.log")
-    conda: "../envs/busco_env.yaml"
+    conda:
+        "../envs/busco_env.yaml"
     threads: 32
     shell:
-        """
+        r"""
+        set -euo pipefail
         mkdir -p $(dirname {output.done})
-        busco -i {input} -o {wildcards.sample}-lja \
+        busco -i {input.assembly} -o {wildcards.sample}-lja \
               -m geno -c {threads} --auto-lineage-euk \
-              --out_path $(dirname {output.dir}) \
+              --out_path $(dirname {output.outdir}) \
               &> {log.out}
         touch {output.done}
         """
-
 
 rule busco_purged_hifiasm:
     input:
-        get_purged_hifiasm_or_original
+        assembly = get_final_hifiasm_abs
     output:
-        dir  = directory(outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/{sample}-purged-hifiasm")),
-        done = outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done")
+        outdir = directory(outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/{sample}-purged-hifiasm")),
+        done   = outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done")
     log:
         out = outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.log")
-    conda: "../envs/busco_env.yaml"
+    conda:
+        "../envs/busco_env.yaml"
     threads: 32
     shell:
-        """
+        r"""
+        set -euo pipefail
         mkdir -p $(dirname {output.done})
-        busco -i {input} -o {wildcards.sample}-purged-hifiasm \
+        busco -i {input.assembly} -o {wildcards.sample}-purged-hifiasm \
               -m geno -c {threads} --auto-lineage-euk \
-              --out_path $(dirname {output.dir}) \
+              --out_path $(dirname {output.outdir}) \
               &> {log.out}
         touch {output.done}
         """
-
 
 rule busco_purged_lja:
     input:
-        get_purged_lja_or_original
+        assembly = get_final_lja_abs
     output:
-        dir  = directory(outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/{sample}-purged-lja")),
-        done = outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done")
+        outdir = directory(outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/{sample}-purged-lja")),
+        done   = outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done")
     log:
         out = outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.log")
-    conda: "../envs/busco_env.yaml"
+    conda:
+        "../envs/busco_env.yaml"
     threads: 32
     shell:
-        """
+        r"""
+        set -euo pipefail
         mkdir -p $(dirname {output.done})
-        busco -i {input} -o {wildcards.sample}-purged-lja \
+        busco -i {input.assembly} -o {wildcards.sample}-purged-lja \
               -m geno -c {threads} --auto-lineage-euk \
-              --out_path $(dirname {output.dir}) \
+              --out_path $(dirname {output.outdir}) \
               &> {log.out}
         touch {output.done}
         """
 
-
-#######################################################################
-# QUAST — run all 4 assemblies in one command
-#######################################################################
 rule quast:
     input:
-        hifiasm        = lambda wc: get_asm_hifiasm_abs(wc),
-        lja            = lambda wc: get_asm_lja_abs(wc),
-        purged_hifiasm = get_purged_hifiasm_or_original,
-        purged_lja     = get_purged_lja_or_original
+        hifiasm   = get_asm_hifiasm_abs,
+        lja       = get_asm_lja_abs,
+        final_hif = get_final_hifiasm_abs,
+        final_lja = get_final_lja_abs
     output:
         done = outpath("Assemblies/{sample}/QC/QUAST/quast.done")
     log:
         out = outpath("Assemblies/{sample}/QC/QUAST/quast.log")
     conda:
         "../envs/quast_env.yaml"
-    threads: 32
+    threads: 16
     shell:
         r"""
         set -euo pipefail
-
         OUTDIR=$(dirname {output.done})
         mkdir -p "$OUTDIR"
 
-        echo "[INFO] Running QUAST on raw + purged assemblies" >> {log.out}
-
-        quast -t {threads} -o "$OUTDIR" \
+        quast.py -t {threads} -o "$OUTDIR" \
             {input.hifiasm} \
             {input.lja} \
-            {input.purged_hifiasm} \
-            {input.purged_lja} \
-            &>> {log.out}
+            {input.final_hif} \
+            {input.final_lja} \
+            &> {log.out}
 
         touch {output.done}
         """
 
-
-#######################################################################
-# MAPPING QC — Illumina reads mapped to purged assemblies
-#######################################################################
 rule mapping_qc:
     input:
-        fq1  = get_fq1_abs,
-        fq2  = get_fq2_abs,
-        phif = get_purged_hifiasm_or_original,
-        plja = get_purged_lja_or_original
+        fq1 = get_fq1_abs,
+        fq2 = get_fq2_abs,
+        hif = get_final_hifiasm_abs,
+        lja = get_final_lja_abs
     output:
-        bam_hifiasm  = outpath("Assemblies/{sample}/QC/Mapping/purged-hifiasm.bam"),
-        bam_lja      = outpath("Assemblies/{sample}/QC/Mapping/purged-lja.bam"),
-        stat_hifiasm = outpath("Assemblies/{sample}/QC/Mapping/purged-hifiasm.flagstat.txt"),
-        stat_lja     = outpath("Assemblies/{sample}/QC/Mapping/purged-lja.flagstat.txt"),
-        done         = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done")
+        bam_hif  = outpath("Assemblies/{sample}/QC/Mapping/purged-hifiasm.bam"),
+        bai_hif  = outpath("Assemblies/{sample}/QC/Mapping/purged-hifiasm.bam.bai"),
+        flag_hif = outpath("Assemblies/{sample}/QC/Mapping/purged-hifiasm.flagstat.txt"),
+        bam_lja  = outpath("Assemblies/{sample}/QC/Mapping/purged-lja.bam"),
+        bai_lja  = outpath("Assemblies/{sample}/QC/Mapping/purged-lja.bam.bai"),
+        flag_lja = outpath("Assemblies/{sample}/QC/Mapping/purged-lja.flagstat.txt"),
+        done     = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done")
     log:
-        out = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.log"),
+        out = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.out"),
         err = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.err")
     conda:
         "../envs/mapping_qc.yaml"
@@ -176,59 +161,9 @@ rule mapping_qc:
             samtools flagstat "$OUTDIR/$PREFIX.bam" > "$OUTDIR/$PREFIX.flagstat.txt"
         }}
 
-        mapit "{input.phif}" "purged-hifiasm"
-        mapit "{input.plja}" "purged-lja"
+        echo "[INFO] Mapping reads to mito-updated final assemblies" >> {log.out}
+        mapit "{input.hif}" "purged-hifiasm"
+        mapit "{input.lja}" "purged-lja"
 
         touch {output.done}
         """
-
-
-#######################################################################
-# MULTIQC
-#######################################################################
-rule multiqc_sample:
-    input:
-        nanoplot  = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.done"),
-        quast     = outpath("Assemblies/{sample}/QC/QUAST/quast.done"),
-        busco_hif = outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"),
-        busco_lja = outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"),
-        busco_ph  = outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"),
-        busco_pl  = outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"),
-        mapping   = outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done"),
-        merqury   = outpath("Assemblies/{sample}/QC/merqury/merqury.done")
-    output:
-        report = outpath("Assemblies/{sample}/QC/multiqc/multiqc_report.html"),
-        done   = outpath("Assemblies/{sample}/QC/multiqc/multiqc.done")
-    log:
-        out = outpath("Assemblies/{sample}/QC/multiqc/multiqc.log"),
-        err = outpath("Assemblies/{sample}/QC/multiqc/multiqc.err")
-    params:
-        qcdir = lambda wc: outpath(f"Assemblies/{wc.sample}/QC"),
-        config = lambda wc: os.path.join(workflow.basedir, "envs/multiqc_config.yaml")
-    conda:
-        "../envs/multiqc_env.yaml"
-    threads: 12
-    shell:
-        r"""
-        set -euo pipefail
-
-        OUTDIR=$(dirname {output.report})
-        mkdir -p "$OUTDIR"
-
-        SAMPLE_QC_DIR=$(realpath {params.qcdir})
-        MULTIQC_CONFIG={params.config}
-
-        echo "[INFO] Running MultiQC on $SAMPLE_QC_DIR" >> {log.out}
-        echo "[INFO] Using config $MULTIQC_CONFIG" >> {log.out}
-
-        multiqc "$SAMPLE_QC_DIR" \
-            --config "$MULTIQC_CONFIG" \
-            --force \
-            --outdir "$OUTDIR" \
-            --filename multiqc_report.html \
-            >> {log.out} 2>> {log.err}
-
-        touch {output.done}
-        """
-
-

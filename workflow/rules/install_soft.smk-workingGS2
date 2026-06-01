@@ -1,0 +1,68 @@
+import os
+
+GS2_REPO   = config.get("genomescope2", {}).get("repo", "https://github.com/tbenavi1/genomescope2.0.git")
+GS2_COMMIT = config.get("genomescope2", {}).get("commit", "")
+PROJECT_DIR = config["project_dir"]
+
+GS2_PREFIX = os.path.join(PROJECT_DIR, "resources", "genomescope2")
+GS2_SRC    = os.path.join(GS2_PREFIX, "src")
+GS2_RLIB   = os.path.join(GS2_PREFIX, "Rlib")
+GS2_DONE   = os.path.join(GS2_PREFIX, ".installed")
+
+rule install_genomescope2:
+    output:
+        done=GS2_DONE
+    params:
+        repo=GS2_REPO,
+        commit=GS2_COMMIT,
+        prefix=GS2_PREFIX,
+        src=GS2_SRC,
+        rlib=GS2_RLIB,
+    conda:
+        "../envs/genomescope2_env.yaml"
+    log:
+        os.path.join(GS2_PREFIX, "install.log")
+    shell:
+        r"""
+        set -euo pipefail
+        set -x
+
+        mkdir -p "{params.prefix}" "{params.rlib}"
+        : > "{log}"
+        exec > >(tee -a "{log}") 2>&1
+
+        echo "[INFO] host=$(hostname)"
+        echo "[INFO] repo={params.repo}"
+        echo "[INFO] commit={params.commit}"
+        echo "[INFO] prefix={params.prefix}"
+        echo "[INFO] rlib={params.rlib}"
+
+        command -v git
+        command -v Rscript
+
+        # clone once
+        if [[ ! -d "{params.src}/.git" ]]; then
+            rm -rf "{params.src}" || true
+            git clone "{params.repo}" "{params.src}"
+        fi
+
+        # optional pin
+        if [[ -n "{params.commit}" ]]; then
+            (cd "{params.src}" && git fetch --all --tags)
+            (cd "{params.src}" && git checkout -f "{params.commit}")
+        fi
+
+        # install into project-local R library
+        export R_LIBS_USER="{params.rlib}"
+        mkdir -p "$R_LIBS_USER"
+
+        Rscript -e 'print(getRversion()); print(.libPaths()); sessionInfo()'
+
+        # run repo installer
+        (cd "{params.src}" && Rscript install.R)
+
+        # verify install
+        Rscript -e 'print(.libPaths()); stopifnot(requireNamespace("genomescope", quietly=TRUE)); cat("[OK] genomescope loadable\n")'
+
+        touch "{output.done}"
+        """

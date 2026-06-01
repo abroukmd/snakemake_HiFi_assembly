@@ -2,167 +2,162 @@
 # Snakefile — HiFi Assembly
 #############################################
 
-import pandas as pd
-from pathlib import Path
 import os
-import sys
-
-# ──────────────────────────────────────────────────
-# Working directory
-# ──────────────────────────────────────────────────
-
-workdir: config["project_dir"]
-
-# ──────────────────────────────────────────────────
-# Validate and load config
-# ──────────────────────────────────────────────────
-
-sample_sheet = config.get("sample_sheet", "").strip()
-if not sample_sheet:
-    raise ValueError("Missing 'sample_sheet' in config file.")
+from pathlib import Path
+import pandas as pd
 
 project_dir = config.get("project_dir", "").strip().rstrip("/")
 if not project_dir:
     raise ValueError("Missing 'project_dir' in config file.")
-
 project_dir = os.path.abspath(project_dir)
 os.makedirs(project_dir, exist_ok=True)
+
+workdir: project_dir
 
 def outpath(*parts):
     return os.path.join(project_dir, *parts)
 
-# ──────────────────────────────────────────────────
-# Load sample metadata
-# ──────────────────────────────────────────────────
+sample_sheet = config.get("sample_sheet", "").strip()
+if not sample_sheet:
+    raise ValueError("Missing 'sample_sheet' in config file.")
+sample_sheet = os.path.abspath(sample_sheet)
+if not Path(sample_sheet).is_file():
+    raise FileNotFoundError(f"Sample sheet not found: {sample_sheet}")
 
 samples_df = pd.read_csv(sample_sheet, sep="\t")
-
 required_columns = {"sample", "HiFi", "Ref", "fq1", "fq2"}
 missing = required_columns - set(samples_df.columns)
 if missing:
-    raise ValueError(f"Missing columns in sample sheet: {missing}")
+    raise ValueError(f"Missing columns in sample sheet: {sorted(missing)}")
 
+samples_df["sample"] = samples_df["sample"].astype(str).str.strip()
 SAMPLES = samples_df["sample"].tolist()
+
+def _truthy(v):
+    return str(v).strip().lower() in {"1", "true", "t", "yes", "y"}
+
+def _pick_samples(df, preferred_cols):
+    for col in preferred_cols:
+        if col in df.columns:
+            return df.loc[df[col].map(_truthy), "sample"].tolist()
+    return df["sample"].tolist()
+
+HIFIASM_SAMPLES = _pick_samples(samples_df, ["run_hifiasm", "hifiasm", "use_hifiasm"])
+LJA_SAMPLES     = _pick_samples(samples_df, ["run_lja", "lja", "use_lja"])
 
 sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
 sample_refs  = dict(zip(samples_df["sample"], samples_df["Ref"]))
 sample_fq1   = dict(zip(samples_df["sample"], samples_df["fq1"]))
 sample_fq2   = dict(zip(samples_df["sample"], samples_df["fq2"]))
+samples      = samples_df.set_index("sample").to_dict(orient="index")
 
-# Optional RagTag flag
 if "ragtag" in samples_df.columns:
-    RAGTAG_SAMPLES = samples_df.query("ragtag == 'Y'")["sample"].tolist()
+    RAGTAG_SAMPLES = samples_df.loc[samples_df["ragtag"].map(_truthy), "sample"].tolist()
 else:
     RAGTAG_SAMPLES = []
 
 print("RAGTAG_SAMPLES =", RAGTAG_SAMPLES)
+print("HIFIASM_SAMPLES =", HIFIASM_SAMPLES)
+print("LJA_SAMPLES =", LJA_SAMPLES)
 
-globals().update({
-    "sample_fq1": sample_fq1,
-    "sample_fq2": sample_fq2,
-    "sample_refs": sample_refs,
-    "RAGTAG_SAMPLES": RAGTAG_SAMPLES
-})
-
-# Validate existence of raw input files
 for s in SAMPLES:
-    for path in [sample_paths[s], sample_fq1[s], sample_fq2[s]]:
+    for path in [sample_paths[s], sample_fq1[s], sample_fq2[s], sample_refs[s]]:
         if not Path(path).is_file():
             raise FileNotFoundError(f"Missing input file for sample {s}: {path}")
 
-# ──────────────────────────────────────────────────
-# Include rule modules
-# ORDER IS IMPORTANT
-# ──────────────────────────────────────────────────
+globals().update({
+    "project_dir": project_dir,
+    "sample_sheet": sample_sheet,
+    "samples_df": samples_df,
+    "samples": samples,
+    "sample_paths": sample_paths,
+    "sample_refs": sample_refs,
+    "sample_fq1": sample_fq1,
+    "sample_fq2": sample_fq2,
+    "SAMPLES": SAMPLES,
+    "HIFIASM_SAMPLES": HIFIASM_SAMPLES,
+    "LJA_SAMPLES": LJA_SAMPLES,
+    "RAGTAG_SAMPLES": RAGTAG_SAMPLES,
+    "outpath": outpath,
+})
 
 include: "accessors.smk"
-
+include: "rules/install_soft.smk"
 include: "rules/qc.smk"
 include: "rules/assembly.smk"
 include: "rules/purge_dups.smk"
 include: "rules/oatk.smk"
 include: "rules/filtering.smk"
 include: "rules/annotation.smk"
+include: "rules/ragtag.smk"
+include: "rules/final_assemblies.smk"
 include: "rules/postqc.smk"
 include: "rules/chromeister.smk"
-
-include: "rules/ragtag.smk"      # must precede Merqury
-include: "rules/merqury.smk"     # Solution B summaries
-include: "rules/chromeister_ragtag.smk"
-
-# include: "rules/ploidy_plot.smk"
-
-# ──────────────────────────────────────────────────
-# Final target rule
-# ──────────────────────────────────────────────────
+include: "rules/chromeister_final.smk"
+include: "rules/ploidy.smk"
+include: "rules/nQuire.smk"
+include: "rules/merqury.smk"
+#include: "rules/chromeister_ragtag.smk"
 
 rule all:
     input:
-        # Pre-QC
-        expand(outpath("Assemblies/{sample}/QC/nanoplot"), sample=SAMPLES),
-
-        # OATK
+        expand(outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"), sample=SAMPLES),
 
-        # Assemblies
-        expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=HIFIASM_SAMPLES),
+        expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=LJA_SAMPLES),
 
-        # Telosearch
         expand(outpath("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta"), sample=SAMPLES),
-
-        # Barrnap
         expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/QC/GenomeScope2/ploidy.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/QC/nQuire/nquire.done"), sample=SAMPLES),
 
-        # BUSCO
-        expand(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"), sample=SAMPLES),
+        # final mito-integrated assemblies
+        expand(outpath("{sample}_FINAL_ASSEMBLIES/hifiasm/{sample}.purged.final.fasta"), sample=HIFIASM_SAMPLES),
+        expand(outpath("{sample}_FINAL_ASSEMBLIES/lja/{sample}.purged.final.fasta"), sample=LJA_SAMPLES),
 
-        # QUAST
+        # BUSCO / QUAST / mapping / Merqury after final assemblies
+        expand(outpath("Assemblies/{sample}/QC/BUSCO-hifiasm/busco_hifiasm.done"), sample=HIFIASM_SAMPLES),
+        expand(outpath("Assemblies/{sample}/QC/BUSCO-lja/busco_lja.done"), sample=LJA_SAMPLES),
+
+        expand(outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"), sample=HIFIASM_SAMPLES),
+        expand(outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"), sample=LJA_SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/QUAST/quast.done"), sample=SAMPLES),
-
-        # Mapping QC
         expand(outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done"), sample=SAMPLES),
-
-        # Chromeister (raw)
-        expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=SAMPLES),
-
-        # Merqury (FINAL QC TARGET)
         expand(outpath("Assemblies/{sample}/QC/merqury/merqury.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/QC/merqury/final/final.done"), sample=SAMPLES),
 
-        # MultiQC (FINAL QC AGGREGATION)
-        expand(outpath("Assemblies/{sample}/QC/multiqc/multiqc.done"), sample=SAMPLES),
-
-        # ─────────────────────────────────────────────
-        # RagTag-only targets
-        # ─────────────────────────────────────────────
-        
+        # RagTag purged only
         expand(
             outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.hifiasm.reforder.fasta"),
             sample=RAGTAG_SAMPLES
         ),
-        #expand(
-        #    outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.fasta.fai"),
-        #    sample=RAGTAG_SAMPLES
-        #),
+        expand(
+            outpath("Assemblies/{sample}/RAGTAG/FINAL_{sample}/{sample}.purged.final.fasta"),
+            sample=RAGTAG_SAMPLES
+        ),
+        expand(
+            outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_purged.done"),
+            sample=RAGTAG_SAMPLES
+        ),
+
         expand(
             outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.lja.reforder.fasta"),
             sample=RAGTAG_SAMPLES
         ),
         expand(
-         outpath("Assemblies/{sample}/QC/BUSCO-purged-hifiasm/busco_purged_hifiasm.done"),
+            outpath("Assemblies/{sample}/RAGTAG_LJA/FINAL_{sample}/{sample}.purged.final.fasta"),
             sample=RAGTAG_SAMPLES
         ),
         expand(
-            outpath("Assemblies/{sample}/QC/BUSCO-purged-lja/busco_purged_lja.done"),
+            outpath("Assemblies/{sample}/RAGTAG_LJA/{sample}_ragtag_lja.done"),
             sample=RAGTAG_SAMPLES
         ),
-        expand(
-            outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done"),
-            sample=RAGTAG_SAMPLES
-        ),
-        expand(
-            outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_lja_ragtag.done"),
-            sample=RAGTAG_SAMPLES
-        )
+
+        # primary Chromeister
+        expand(outpath("Assemblies/{sample}/CHROMEISTER/.hifiasm.done"), sample=HIFIASM_SAMPLES),
+        expand(outpath("Assemblies/{sample}/CHROMEISTER/.lja.done"), sample=LJA_SAMPLES),
+
+        # final Chromeister on final mito-integrated assemblies
+        expand(outpath("{sample}_FINAL_ASSEMBLIES/hifiasm/CHROMEISTER/.final_hifiasm.done"), sample=HIFIASM_SAMPLES),
+        expand(outpath("{sample}_FINAL_ASSEMBLIES/lja/CHROMEISTER/.final_lja.done"), sample=LJA_SAMPLES)

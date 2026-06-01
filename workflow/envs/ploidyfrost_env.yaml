@@ -1,0 +1,18 @@
+name: ploidyfrost
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+channel_priority: strict
+dependencies:
+  - cmake>=3.28
+  - make
+  - git
+  - gxx_linux-64
+  - zlib
+  - libzlib
+  - kmc
+  - r-base
+  - r-optparse
+  - r-ggplot2
+  - r-data.table

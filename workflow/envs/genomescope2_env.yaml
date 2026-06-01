@@ -1,0 +1,21 @@
+name: genomescope2_env
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - git
+  - make
+  - wget
+  - gcc
+  - kmc
+  - r-base
+  - r-minpack.lm 
+  - r-argparse
+  - r-optparse
+  - r-ggplot2
+  - r-dplyr
+  - r-tidyr
+  - r-devtools
+  - r-remotes
+  - pip
+  
