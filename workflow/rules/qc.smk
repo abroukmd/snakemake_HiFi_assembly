@@ -3,27 +3,30 @@ rule nanoplot:
         lambda wildcards: sample_paths[wildcards.sample]
     output:
         nanoplot_dir = directory(outpath("Assemblies/{sample}/QC/nanoplot")),
+        stats         = outpath("Assemblies/{sample}/QC/nanoplot/NanoStats.txt"),
+        report        = outpath("Assemblies/{sample}/QC/nanoplot/NanoPlot-report.html"),
         done          = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.done")
     log:
         stdout = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.log"),
         stderr = outpath("Assemblies/{sample}/QC/nanoplot/nanoplot.err")
     conda:
         "../envs/nanoplot_env.yaml"
-    params:
-        cores=12
+    threads: 12
     shell:
         r"""
         set -euo pipefail
 
         NanoPlot \
-            -o {output.nanoplot_dir} \
-            -t {params.cores} \
-            --fastq {input} \
+            -o {output.nanoplot_dir:q} \
+            -t {threads} \
+            --fastq {input:q} \
             --maxlength 40000 \
             --plots dot \
-            > {log.stdout} 2> {log.stderr}
+            > {log.stdout:q} 2> {log.stderr:q}
 
-        touch {output.done}
+        test -s {output.stats:q}
+        test -s {output.report:q}
+        touch {output.done:q}
         """
 
 

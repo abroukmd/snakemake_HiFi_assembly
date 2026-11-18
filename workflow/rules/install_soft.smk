@@ -62,21 +62,28 @@ rule install_genomescope2:
             git clone --depth 1 "{params.repo}" "{params.src}"
         fi
 
-        # optional pin
+        # Resolve the requested revision to its immutable commit and verify HEAD.
         if [[ -n "{params.commit}" ]]; then
             (cd "{params.src}" && git fetch --all --tags)
             (cd "{params.src}" && git checkout -f "{params.commit}")
+            test "$(git -C {params.src:q} rev-parse HEAD)" = \
+                 "$(git -C {params.src:q} rev-parse {params.commit:q}^{{commit}})"
         fi
 
         export R_LIBS_USER="{params.rlib}"
 
         Rscript -e 'cat("[INFO] R:", as.character(getRversion()), "\n"); cat("[INFO] R_LIBS_USER=", Sys.getenv("R_LIBS_USER"), "\n"); cat("[INFO] .libPaths():\n", paste(.libPaths(), collapse="\n"), "\n", sep="")'
 
-        (cd "{params.src}" && Rscript install.R)
+        # The pinned DESCRIPTION imports only these three R packages. Upstream's
+        # install.R reinstalls them with dependencies=TRUE, pulling unrelated
+        # optional spatial packages and their system libraries from CRAN.
+        Rscript -e 'required <- c("argparse", "jsonlite", "minpack.lm"); missing <- required[!vapply(required, requireNamespace, logical(1), quietly=TRUE)]; if (length(missing)) stop("Missing required Conda R packages: ", paste(missing, collapse=", "))'
+        R CMD INSTALL --library={params.rlib:q} {params.src:q}
 
-        # verify
-        Rscript -e 'stopifnot(requireNamespace("genomescope", quietly=TRUE)); cat("[OK] genomescope loadable\n")'
+        # Verify the package is loaded from this project's Rlib and its package
+        # identity/version agree with the checked-out, pinned source.
+        Rscript -e 'expected <- normalizePath(Sys.getenv("R_LIBS_USER")); actual <- normalizePath(find.package("genomescope", lib.loc=expected)); stopifnot(dirname(actual) == expected); installed <- packageDescription("genomescope", lib.loc=expected); source <- read.dcf(file.path(commandArgs(TRUE)[1], "DESCRIPTION")); stopifnot(installed$Package == source[1,"Package"], installed$Version == source[1,"Version"]); stopifnot(requireNamespace("genomescope", lib.loc=expected, quietly=TRUE)); cat("[OK] genomescope", installed$Version, "loaded from", actual, "\n")' {params.src:q}
 
-        touch "{output.done}"
+        git -C {params.src:q} rev-parse HEAD > {output.done:q}
         """
 

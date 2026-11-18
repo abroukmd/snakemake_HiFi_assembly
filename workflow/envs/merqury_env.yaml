@@ -1,4 +1,4 @@
-name: merqury_test
+name: merqury
 channels:
   - conda-forge
   - bioconda
@@ -82,7 +82,8 @@ dependencies:
   - libxcb=1.17.0
   - libzlib=1.3.1
   - make=4.4.1
-  - merqury=1.1
+  # v1.1 uses removed meryl-lookup flags and fails with the pinned ggplot2.
+  - merqury=1.4.1
   - meryl=1.4.1
   - ncurses=6.5
   - openjdk=23.0.2
@@ -148,4 +149,3 @@ dependencies:
   - xorg-libxt=1.3.1
   - xorg-libxtst=1.2.5
   - zstd=1.5.7
-prefix: /home/u0176926/anaconda3/envs/merqury_test

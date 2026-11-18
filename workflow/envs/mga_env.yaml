@@ -1,0 +1,20 @@
+name: mga
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  # Match the supported versions in MGA's pinned requirements.yml. Git's
+  # version is selected to share the zlib ABI required by minimap2 2.21.
+  - python=3.10
+  - gxx_linux-64=11.4.0
+  # conda-forge carries this patch of upstream's tested CMake 3.22 series.
+  - cmake=3.22.3
+  - make=4.4.1
+  - git=2.42.0
+  - zlib=1.2.13
+  - minimap2=2.21
+  - samtools=1.20
+  - pysam=0.22.1
+  - biopython=1.81
+  - numpy=2.2.5

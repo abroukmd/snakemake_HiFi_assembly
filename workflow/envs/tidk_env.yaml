@@ -1,0 +1,7 @@
+name: tidk_env
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.10
+  - tidk=0.2.7

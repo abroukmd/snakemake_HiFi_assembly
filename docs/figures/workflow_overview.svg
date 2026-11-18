@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2080" height="1280" viewBox="0 0 2080 1280" role="img" aria-labelledby="figure-title figure-description">
+<title id="figure-title">HiFi assembly workflow — assembly route map</title>
+<desc id="figure-description">Full HiFi reads feed independent hifiasm and LJA routes, parallel OATK mitochondrial assembly, and optional MGA. Core assemblies undergo overlap-only purging, optional RagTag or its sorted-purged bypass, then mitochondrial integration. Raw and final QC checkpoints preserve assembler identity. MGA ends at its separate polished first-phase FASTA and native graphs. Required data are blue ellipses.</desc>
+<defs>
+<marker id="arrow-paper" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#FFFFFF"/></marker>
+<marker id="arrow-ink" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#192A35"/></marker>
+<marker id="arrow-muted" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#5C6870"/></marker>
+<marker id="arrow-line" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#A7ADAE"/></marker>
+<marker id="arrow-input" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#2B9FF3"/></marker>
+<marker id="arrow-hif" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#67BA48"/></marker>
+<marker id="arrow-lja" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#F1A43D"/></marker>
+<marker id="arrow-mga" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#A365D3"/></marker>
+<marker id="arrow-mito" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#17ABA5"/></marker>
+<marker id="arrow-qc" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#9DD6AB"/></marker>
+<marker id="arrow-bypass" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#EC6869"/></marker>
+</defs>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<rect x="0" y="0" width="2080" height="1280" rx="0" fill="#FFFFFF"/>
+<text x="64" y="65" font-size="36" fill="#192A35" text-anchor="start" font-weight="700">HiFi assembly workflow</text>
+<text x="64" y="104" font-size="20" fill="#5C6870" text-anchor="start">Independent assemblies, refinement and QC</text>
+<path d="M 295 470 L 332 470 Q 345 470 345 457 L 345 381 Q 345 368 358 368 L 390 368" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 295 470 L 332 470 Q 345 470 345 457 L 345 381 Q 345 368 358 368 L 390 368" fill="none" stroke="#2B9FF3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 345 470 L 345 595 Q 345 608 358 608 L 390 608" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 345 470 L 345 595 Q 345 608 358 608 L 390 608" fill="none" stroke="#2B9FF3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 345 608 L 345 855 Q 345 868 358 868 L 390 868" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 345 608 L 345 855 Q 345 868 358 868 L 390 868" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-mga)"/>
+<path d="M 175 420 L 175 229 Q 175 216 188 216 L 1000 216" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 175 420 L 175 229 Q 175 216 188 216 L 1000 216" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 935 110 L 947.5 110 Q 960 110 960 122.5 L 960 203 Q 960 216 973 216 L 1000 216" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 935 110 L 947.5 110 Q 960 110 960 122.5 L 960 203 Q 960 216 973 216 L 1000 216" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 175 520 L 175 770" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 175 520 L 175 770" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1780 155 L 1780 267 Q 1780 280 1767 280 L 1113 280 Q 1100 280 1100 293 L 1100 330" fill="none" stroke="white" stroke-width="8.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1780 155 L 1780 267 Q 1780 280 1767 280 L 1113 280 Q 1100 280 1100 293 L 1100 330" fill="none" stroke="#2B9FF3" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1238 280 L 1238 507 Q 1238 520 1225 520 L 1113 520 Q 1100 520 1100 533 L 1100 570" fill="none" stroke="white" stroke-width="8.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1238 280 L 1238 507 Q 1238 520 1225 520 L 1113 520 Q 1100 520 1100 533 L 1100 570" fill="none" stroke="#2B9FF3" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1910 110 L 2007 110 Q 2020 110 2020 123 L 2020 1009 Q 2020 1022 2007 1022 L 1863 1022 Q 1850 1022 1850 1009 L 1850 977" fill="none" stroke="white" stroke-width="8.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1910 110 L 2007 110 Q 2020 110 2020 123 L 2020 1009 Q 2020 1022 2007 1022 L 1863 1022 Q 1850 1022 1850 1009 L 1850 977" fill="none" stroke="#2B9FF3" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1790 1090 L 1790 1058 Q 1790 1045 1777 1045 L 1753 1045 Q 1740 1045 1740 1032 L 1740 977" fill="none" stroke="white" stroke-width="8.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1790 1090 L 1790 1058 Q 1790 1045 1777 1045 L 1753 1045 Q 1740 1045 1740 1032 L 1740 977" fill="none" stroke="#2B9FF3" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1200 216 L 1300 216" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1200 216 L 1300 216" fill="none" stroke="#17ABA5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-mito)"/>
+<path d="M 1417 252 L 1417 330" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1417 252 L 1417 330" fill="none" stroke="#17ABA5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-mito)"/>
+<path d="M 1535 216 L 1577 216 Q 1590 216 1590 229 L 1590 512 Q 1590 525 1577 525 L 1430 525 Q 1417 525 1417 538 L 1417 570" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1535 216 L 1577 216 Q 1590 216 1590 229 L 1590 512 Q 1590 525 1577 525 L 1430 525 Q 1417 525 1417 538 L 1417 570" fill="none" stroke="#17ABA5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-mito)"/>
+<path d="M 600 368 L 700 368" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 368 L 700 368" fill="none" stroke="#67BA48" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 915 368 L 1000 368" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 915 368 L 1000 368" fill="none" stroke="#67BA48" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 1200 368 L 1300 368" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1200 368 L 1300 368" fill="none" stroke="#67BA48" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 1535 368 L 1650 368" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1535 368 L 1650 368" fill="none" stroke="#67BA48" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 940 368 L 945 368 Q 950 368 950 373 L 950 437 Q 950 450 963 450 L 1404 450 Q 1417 450 1417 437 L 1417 406" fill="none" stroke="white" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 940 368 L 945 368 Q 950 368 950 373 L 950 437 Q 950 450 963 450 L 1404 450 Q 1417 450 1417 437 L 1417 406" fill="none" stroke="#EC6869" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-bypass)"/>
+<rect x="1118.1" y="425" width="103.8" height="25" rx="3" fill="#FFFFFF"/>
+<text x="1170" y="442" font-size="17" fill="#EC6869" text-anchor="middle">ragtag: N</text>
+<rect x="628.7" y="330" width="42.6" height="25" rx="3" fill="#FFFFFF"/>
+<text x="650" y="347" font-size="17" fill="#5C6870" text-anchor="middle">raw</text>
+<rect x="920.4" y="331" width="79.2" height="24" rx="3" fill="#FFFFFF"/>
+<text x="960" y="347" font-size="16" fill="#5C6870" text-anchor="middle">primary</text>
+<path d="M 650 368 L 650 418" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 650 368 L 650 418" fill="none" stroke="#9DD6AB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-qc)"/>
+<circle cx="650" cy="434" r="16" fill="#e6f5ea" stroke="#9DD6AB" stroke-width="2.5"/>
+<text x="650" y="439" font-size="12" fill="#192A35" text-anchor="middle" font-weight="700">QC</text>
+<path d="M 1910 368 L 1967 368 Q 1980 368 1980 381 L 1980 916 Q 1980 921 1975 921 L 1970 921" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1910 368 L 1967 368 Q 1980 368 1980 381 L 1980 916 Q 1980 921 1975 921 L 1970 921" fill="none" stroke="#9DD6AB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-qc)"/>
+<path d="M 600 608 L 700 608" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 608 L 700 608" fill="none" stroke="#F1A43D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-lja)"/>
+<path d="M 915 608 L 1000 608" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 915 608 L 1000 608" fill="none" stroke="#F1A43D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-lja)"/>
+<path d="M 1200 608 L 1300 608" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1200 608 L 1300 608" fill="none" stroke="#F1A43D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-lja)"/>
+<path d="M 1535 608 L 1650 608" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1535 608 L 1650 608" fill="none" stroke="#F1A43D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-lja)"/>
+<path d="M 940 608 L 945 608 Q 950 608 950 613 L 950 677 Q 950 690 963 690 L 1404 690 Q 1417 690 1417 677 L 1417 646" fill="none" stroke="white" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 940 608 L 945 608 Q 950 608 950 613 L 950 677 Q 950 690 963 690 L 1404 690 Q 1417 690 1417 677 L 1417 646" fill="none" stroke="#EC6869" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-bypass)"/>
+<rect x="1118.1" y="665" width="103.8" height="25" rx="3" fill="#FFFFFF"/>
+<text x="1170" y="682" font-size="17" fill="#EC6869" text-anchor="middle">ragtag: N</text>
+<rect x="628.7" y="570" width="42.6" height="25" rx="3" fill="#FFFFFF"/>
+<text x="650" y="587" font-size="17" fill="#5C6870" text-anchor="middle">raw</text>
+<rect x="920.4" y="571" width="79.2" height="24" rx="3" fill="#FFFFFF"/>
+<text x="960" y="587" font-size="16" fill="#5C6870" text-anchor="middle">primary</text>
+<path d="M 650 608 L 650 658" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 650 608 L 650 658" fill="none" stroke="#9DD6AB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-qc)"/>
+<circle cx="650" cy="674" r="16" fill="#e6f5ea" stroke="#9DD6AB" stroke-width="2.5"/>
+<text x="650" y="679" font-size="12" fill="#192A35" text-anchor="middle" font-weight="700">QC</text>
+<path d="M 1910 608 L 1967 608 Q 1980 608 1980 621 L 1980 916 Q 1980 921 1975 921 L 1970 921" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1910 608 L 1967 608 Q 1980 608 1980 621 L 1980 916 Q 1980 921 1975 921 L 1970 921" fill="none" stroke="#9DD6AB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-qc)"/>
+<path d="M 600 868 L 700 868" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 868 L 700 868" fill="none" stroke="#A365D3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-mga)"/>
+<ellipse cx="175" cy="470" rx="120" ry="50" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="175" y="464.48" font-size="22" fill="#192A35" text-anchor="middle">PacBio HiFi</text>
+<text x="175" y="490.48" font-size="22" fill="#192A35" text-anchor="middle">reads</text>
+<ellipse cx="810" cy="110" rx="125" ry="45" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="810" y="104.96000000000001" font-size="19" fill="#192A35" text-anchor="middle">OATK database</text>
+<text x="810" y="127.96000000000001" font-size="19" fill="#192A35" text-anchor="middle">organellar models</text>
+<ellipse cx="1780" cy="110" rx="130" ry="45" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1780" y="104.96000000000001" font-size="19" fill="#192A35" text-anchor="middle">External reference</text>
+<text x="1780" y="127.96000000000001" font-size="19" fill="#192A35" text-anchor="middle">genome</text>
+<ellipse cx="1790" cy="1135" rx="130" ry="45" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1790" y="1129.48" font-size="22" fill="#192A35" text-anchor="middle">Illumina</text>
+<text x="1790" y="1155.48" font-size="22" fill="#192A35" text-anchor="middle">R1 / R2</text>
+<rect x="1000" y="180" width="200" height="72" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1100.0" y="210.795" font-size="25" fill="#192A35" text-anchor="middle">OATK</text>
+<text x="1100.0" y="236.795" font-size="17" fill="#5C6870" text-anchor="middle">mito assembly</text>
+<rect x="1300" y="180" width="235" height="72" rx="17" fill="#eff9f9" stroke="#17ABA5" stroke-width="3"/>
+<text x="1417.5" y="210.515" font-size="23" fill="#192A35" text-anchor="middle">Mito contigs</text>
+<text x="1417.5" y="235.515" font-size="17" fill="#5C6870" text-anchor="middle">OATK FASTA</text>
+<rect x="390" y="330" width="210" height="76" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="495.0" y="375.425" font-size="27" fill="#192A35" text-anchor="middle">hifiasm</text>
+<rect x="700" y="330" width="215" height="76" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="807.5" y="362.515" font-size="23" fill="#192A35" text-anchor="middle">purge_dups</text>
+<text x="807.5" y="387.515" font-size="17" fill="#5C6870" text-anchor="middle">overlap only</text>
+<rect x="1000" y="330" width="200" height="76" rx="17" fill="#FFFFFF" stroke="#EC6869" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="1100.0" y="362.795" font-size="25" fill="#192A35" text-anchor="middle">RagTag</text>
+<text x="1100.0" y="388.795" font-size="17" fill="#5C6870" text-anchor="middle">optional scaffolding</text>
+<rect x="1300" y="330" width="235" height="76" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1417.5" y="362.515" font-size="23" fill="#192A35" text-anchor="middle">Mito integration</text>
+<text x="1417.5" y="387.515" font-size="17" fill="#5C6870" text-anchor="middle">Coverage + identity</text>
+<rect x="1650" y="330" width="260" height="76" rx="17" fill="#f4faf2" stroke="#67BA48" stroke-width="3"/>
+<text x="1780.0" y="362.655" font-size="24" fill="#192A35" text-anchor="middle">Final candidate</text>
+<text x="1780.0" y="388.155" font-size="17" fill="#5C6870" text-anchor="middle">hifiasm FASTA</text>
+<text x="807" y="457" font-size="17" fill="#5C6870" text-anchor="middle">Primary + hap FASTAs retained</text>
+<rect x="390" y="570" width="210" height="76" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="495.0" y="615.425" font-size="27" fill="#192A35" text-anchor="middle">LJA</text>
+<rect x="700" y="570" width="215" height="76" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="807.5" y="602.515" font-size="23" fill="#192A35" text-anchor="middle">purge_dups</text>
+<text x="807.5" y="627.515" font-size="17" fill="#5C6870" text-anchor="middle">overlap only</text>
+<rect x="1000" y="570" width="200" height="76" rx="17" fill="#FFFFFF" stroke="#EC6869" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="1100.0" y="602.795" font-size="25" fill="#192A35" text-anchor="middle">RagTag</text>
+<text x="1100.0" y="628.795" font-size="17" fill="#5C6870" text-anchor="middle">optional scaffolding</text>
+<rect x="1300" y="570" width="235" height="76" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1417.5" y="602.515" font-size="23" fill="#192A35" text-anchor="middle">Mito integration</text>
+<text x="1417.5" y="627.515" font-size="17" fill="#5C6870" text-anchor="middle">Coverage + identity</text>
+<rect x="1650" y="570" width="260" height="76" rx="17" fill="#fef9f1" stroke="#F1A43D" stroke-width="3"/>
+<text x="1780.0" y="602.655" font-size="24" fill="#192A35" text-anchor="middle">Final candidate</text>
+<text x="1780.0" y="628.155" font-size="17" fill="#5C6870" text-anchor="middle">LJA FASTA</text>
+<text x="807" y="697" font-size="17" fill="#5C6870" text-anchor="middle">Primary + hap FASTAs retained</text>
+<rect x="55" y="770" width="240" height="100" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="175.0" y="803.515" font-size="23" fill="#192A35" text-anchor="middle">Read profiles</text>
+<text x="175.0" y="828.515" font-size="17" fill="#5C6870" text-anchor="middle">NanoPlot</text>
+<text x="175.0" y="850.515" font-size="17" fill="#5C6870" text-anchor="middle">TeloSearchLR</text>
+<rect x="390" y="830" width="210" height="76" rx="17" fill="#FFFFFF" stroke="#A365D3" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="495.0" y="863.075" font-size="27" fill="#192A35" text-anchor="middle">MGA</text>
+<text x="495.0" y="890.075" font-size="17" fill="#5C6870" text-anchor="middle">optional first phase</text>
+<rect x="700" y="818" width="370" height="100" rx="17" fill="#f9f4fc" stroke="#A365D3" stroke-width="3"/>
+<text x="885.0" y="862.795" font-size="25" fill="#192A35" text-anchor="middle">MGA consensus</text>
+<text x="885.0" y="888.795" font-size="17" fill="#5C6870" text-anchor="middle">Polished FASTA + native graphs</text>
+<text x="1100" y="856" font-size="21" fill="#A365D3" text-anchor="start" font-weight="700">Ends after native polishing.</text>
+<text x="1100" y="887" font-size="18" fill="#5C6870" text-anchor="start">Separate from core refinement and QC.</text>
+<rect x="1650" y="865" width="320" height="112" rx="17" fill="#f8fcf9" stroke="#9DD6AB" stroke-width="3"/>
+<text x="1810.0" y="904.935" font-size="26" fill="#192A35" text-anchor="middle">Assembly QC</text>
+<text x="1810.0" y="931.435" font-size="17" fill="#5C6870" text-anchor="middle">BUSCO · QUAST</text>
+<text x="1810.0" y="953.435" font-size="17" fill="#5C6870" text-anchor="middle">Merqury · Chromeister</text>
+<text x="1810" y="836" font-size="19" fill="#5C6870" text-anchor="middle">Raw + final checkpoints</text>
+<text x="495" y="307" font-size="14" fill="#5C6870" text-anchor="middle" font-weight="700">ASSEMBLE</text>
+<text x="807" y="307" font-size="14" fill="#5C6870" text-anchor="middle" font-weight="700">PURGE</text>
+<text x="1100" y="307" font-size="14" fill="#5C6870" text-anchor="middle" font-weight="700">SCAFFOLD</text>
+<text x="1417" y="307" font-size="14" fill="#5C6870" text-anchor="middle" font-weight="700">INTEGRATE MITO</text>
+<text x="1780" y="307" font-size="14" fill="#5C6870" text-anchor="middle" font-weight="700">CANDIDATE FASTA</text>
+<text x="60" y="941" font-size="21" fill="#192A35" text-anchor="start" font-weight="700">Paths and settings</text>
+<path d="M 60 974 L 115 974" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 60 974 L 115 974" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="132" y="979" font-size="19" fill="#192A35" text-anchor="start" font-weight="700">hifiasm route</text>
+<text x="132" y="1002" font-size="16" fill="#5C6870" text-anchor="start">Processed independently from LJA</text>
+<path d="M 60 1025 L 115 1025" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 60 1025 L 115 1025" fill="none" stroke="#F1A43D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="132" y="1030" font-size="19" fill="#192A35" text-anchor="start" font-weight="700">LJA route</text>
+<text x="132" y="1053" font-size="16" fill="#5C6870" text-anchor="start">Processed independently from hifiasm</text>
+<path d="M 60 1076 L 115 1076" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 60 1076 L 115 1076" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7"/>
+<text x="132" y="1081" font-size="19" fill="#192A35" text-anchor="start" font-weight="700">Optional MGA branch</text>
+<text x="132" y="1104" font-size="16" fill="#5C6870" text-anchor="start">run_mga: Y in sample sheet</text>
+<path d="M 60 1127 L 115 1127" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 60 1127 L 115 1127" fill="none" stroke="#17ABA5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="132" y="1132" font-size="19" fill="#192A35" text-anchor="start" font-weight="700">Mitochondrial contigs</text>
+<text x="132" y="1155" font-size="16" fill="#5C6870" text-anchor="start">OATK supplies both core branches</text>
+<path d="M 60 1178 L 115 1178" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 60 1178 L 115 1178" fill="none" stroke="#EC6869" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7"/>
+<text x="132" y="1183" font-size="19" fill="#192A35" text-anchor="start" font-weight="700">Skip reference scaffolding</text>
+<text x="132" y="1206" font-size="16" fill="#5C6870" text-anchor="start">ragtag: N; continue from sorted purged contigs</text>
+<g transform="translate(1260 1000) scale(1.1)" aria-label="Original HiFi DNA ribbon motif">
+<path d="M -145.588 -21.7991 L -145.588 21.7991" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -145.588 -21.7991 L -145.588 21.7991" stroke="#F1A43D" stroke-width="5" stroke-linecap="round"/>
+<path d="M -126.176 -36.2094 L -126.176 36.2094" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -126.176 -36.2094 L -126.176 36.2094" stroke="#A365D3" stroke-width="5" stroke-linecap="round"/>
+<path d="M -106.765 -46.0099 L -106.765 46.0099" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -106.765 -46.0099 L -106.765 46.0099" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round"/>
+<path d="M -87.3529 -49.9527 L -87.3529 49.9527" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -87.3529 -49.9527 L -87.3529 49.9527" stroke="#17ABA5" stroke-width="5" stroke-linecap="round"/>
+<path d="M -67.9412 -47.536 L -67.9412 47.536" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -67.9412 -47.536 L -67.9412 47.536" stroke="#67BA48" stroke-width="5" stroke-linecap="round"/>
+<path d="M -48.5294 -39.0674 L -48.5294 39.0674" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -48.5294 -39.0674 L -48.5294 39.0674" stroke="#F1A43D" stroke-width="5" stroke-linecap="round"/>
+<path d="M -29.1176 -25.625 L -29.1176 25.625" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M -29.1176 -25.625 L -29.1176 25.625" stroke="#A365D3" stroke-width="5" stroke-linecap="round"/>
+<path d="M 29.1176 25.625 L 29.1176 -25.625" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 29.1176 25.625 L 29.1176 -25.625" stroke="#67BA48" stroke-width="5" stroke-linecap="round"/>
+<path d="M 48.5294 39.0674 L 48.5294 -39.0674" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 48.5294 39.0674 L 48.5294 -39.0674" stroke="#F1A43D" stroke-width="5" stroke-linecap="round"/>
+<path d="M 67.9412 47.536 L 67.9412 -47.536" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 67.9412 47.536 L 67.9412 -47.536" stroke="#A365D3" stroke-width="5" stroke-linecap="round"/>
+<path d="M 87.3529 49.9527 L 87.3529 -49.9527" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 87.3529 49.9527 L 87.3529 -49.9527" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round"/>
+<path d="M 106.765 46.0099 L 106.765 -46.0099" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 106.765 46.0099 L 106.765 -46.0099" stroke="#17ABA5" stroke-width="5" stroke-linecap="round"/>
+<path d="M 126.176 36.2094 L 126.176 -36.2094" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 126.176 36.2094 L 126.176 -36.2094" stroke="#67BA48" stroke-width="5" stroke-linecap="round"/>
+<path d="M 145.588 21.7991 L 145.588 -21.7991" stroke="#192A35" stroke-width="9" stroke-linecap="round"/>
+<path d="M 145.588 21.7991 L 145.588 -21.7991" stroke="#F1A43D" stroke-width="5" stroke-linecap="round"/>
+<path d="M -170 0 L -167 2.77057 L -164 5.53263 L -161 8.27769 L -158 10.9973 L -155 13.6831 L -152 16.3269 L -149 18.9206 L -146 21.456 L -143 23.9256 L -140 26.3216 L -137 28.6368 L -134 30.8639 L -131 32.9962 L -128 35.0272 L -125 36.9504 L -122 38.7602 L -119 40.4508 L -116 42.0172 L -113 43.4544 L -110 44.7582 L -107 45.9243 L -104 46.9494 L -101 47.8302 L -98 48.5641 L -95 49.1487 L -92 49.5822 L -89 49.8635 L -86 49.9915 L -83 49.9659 L -80 49.7867 L -77 49.4546 L -74 48.9705 L -71 48.3359 L -68 47.5528 L -65 46.6236 L -62 45.5511 L -59 44.3387 L -56 42.99 L -53 41.5092 L -50 39.9009 L -47 38.1699 L -44 36.3217 L -41 34.3618 L -38 32.2964 L -35 30.1317 L -32 27.8745 L -29 25.5316 L -26 23.1102 L -23 20.6178 L -20 18.0621 L -17 15.4508 L -14 12.7921 L -11 10.0941 L -8 7.36508 L -5 4.61342 L -2 1.84757 L 1 -0.923945 L 4 -3.69263 L 7 -6.44996 L 10 -9.18748 L 13 -11.8968 L 16 -14.5695 L 19 -17.1974 L 22 -19.7726 L 25 -22.2869 L 28 -24.7328 L 31 -27.1027 L 34 -29.3893 L 37 -31.5856 L 40 -33.6848 L 43 -35.6805 L 46 -37.5666 L 49 -39.3372 L 52 -40.987 L 55 -42.5109 L 58 -43.9041 L 61 -45.1624 L 64 -46.2819 L 67 -47.2592 L 70 -48.0913 L 73 -48.7756 L 76 -49.31 L 79 -49.693 L 82 -49.9232 L 85 -50 L 88 -49.9232 L 91 -49.693 L 94 -49.31 L 97 -48.7756 L 100 -48.0913 L 103 -47.2592 L 106 -46.2819 L 109 -45.1624 L 112 -43.9041 L 115 -42.5109 L 118 -40.987 L 121 -39.3372 L 124 -37.5666 L 127 -35.6805 L 130 -33.6848 L 133 -31.5856 L 136 -29.3893 L 139 -27.1027 L 142 -24.7328 L 145 -22.2869 L 148 -19.7726 L 151 -17.1974 L 154 -14.5695 L 157 -11.8968 L 160 -9.18748 L 163 -6.44996 L 166 -3.69263 L 169 -0.923945" fill="none" stroke="#192A35" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M -170 0 L -167 2.77057 L -164 5.53263 L -161 8.27769 L -158 10.9973 L -155 13.6831 L -152 16.3269 L -149 18.9206 L -146 21.456 L -143 23.9256 L -140 26.3216 L -137 28.6368 L -134 30.8639 L -131 32.9962 L -128 35.0272 L -125 36.9504 L -122 38.7602 L -119 40.4508 L -116 42.0172 L -113 43.4544 L -110 44.7582 L -107 45.9243 L -104 46.9494 L -101 47.8302 L -98 48.5641 L -95 49.1487 L -92 49.5822 L -89 49.8635 L -86 49.9915 L -83 49.9659 L -80 49.7867 L -77 49.4546 L -74 48.9705 L -71 48.3359 L -68 47.5528 L -65 46.6236 L -62 45.5511 L -59 44.3387 L -56 42.99 L -53 41.5092 L -50 39.9009 L -47 38.1699 L -44 36.3217 L -41 34.3618 L -38 32.2964 L -35 30.1317 L -32 27.8745 L -29 25.5316 L -26 23.1102 L -23 20.6178 L -20 18.0621 L -17 15.4508 L -14 12.7921 L -11 10.0941 L -8 7.36508 L -5 4.61342 L -2 1.84757 L 1 -0.923945 L 4 -3.69263 L 7 -6.44996 L 10 -9.18748 L 13 -11.8968 L 16 -14.5695 L 19 -17.1974 L 22 -19.7726 L 25 -22.2869 L 28 -24.7328 L 31 -27.1027 L 34 -29.3893 L 37 -31.5856 L 40 -33.6848 L 43 -35.6805 L 46 -37.5666 L 49 -39.3372 L 52 -40.987 L 55 -42.5109 L 58 -43.9041 L 61 -45.1624 L 64 -46.2819 L 67 -47.2592 L 70 -48.0913 L 73 -48.7756 L 76 -49.31 L 79 -49.693 L 82 -49.9232 L 85 -50 L 88 -49.9232 L 91 -49.693 L 94 -49.31 L 97 -48.7756 L 100 -48.0913 L 103 -47.2592 L 106 -46.2819 L 109 -45.1624 L 112 -43.9041 L 115 -42.5109 L 118 -40.987 L 121 -39.3372 L 124 -37.5666 L 127 -35.6805 L 130 -33.6848 L 133 -31.5856 L 136 -29.3893 L 139 -27.1027 L 142 -24.7328 L 145 -22.2869 L 148 -19.7726 L 151 -17.1974 L 154 -14.5695 L 157 -11.8968 L 160 -9.18748 L 163 -6.44996 L 166 -3.69263 L 169 -0.923945" fill="none" stroke="#2B9FF3" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M -170 0 L -167 2.77057 L -164 5.53263 L -161 8.27769 L -158 10.9973 L -155 13.6831 L -152 16.3269 L -149 18.9206 L -146 21.456 L -143 23.9256 L -140 26.3216 L -137 28.6368 L -134 30.8639 L -131 32.9962 L -128 35.0272 L -125 36.9504 L -122 38.7602 L -119 40.4508 L -116 42.0172 L -113 43.4544 L -110 44.7582 L -107 45.9243 L -104 46.9494 L -101 47.8302 L -98 48.5641 L -95 49.1487 L -92 49.5822 L -89 49.8635 L -86 49.9915 L -83 49.9659 L -80 49.7867 L -77 49.4546 L -74 48.9705 L -71 48.3359 L -68 47.5528 L -65 46.6236 L -62 45.5511 L -59 44.3387 L -56 42.99 L -53 41.5092 L -50 39.9009 L -47 38.1699 L -44 36.3217 L -41 34.3618 L -38 32.2964 L -35 30.1317 L -32 27.8745 L -29 25.5316 L -26 23.1102 L -23 20.6178 L -20 18.0621 L -17 15.4508 L -14 12.7921 L -11 10.0941 L -8 7.36508 L -5 4.61342 L -2 1.84757 L 1 -0.923945 L 4 -3.69263 L 7 -6.44996 L 10 -9.18748 L 13 -11.8968 L 16 -14.5695 L 19 -17.1974 L 22 -19.7726 L 25 -22.2869 L 28 -24.7328 L 31 -27.1027 L 34 -29.3893 L 37 -31.5856 L 40 -33.6848 L 43 -35.6805 L 46 -37.5666 L 49 -39.3372 L 52 -40.987 L 55 -42.5109 L 58 -43.9041 L 61 -45.1624 L 64 -46.2819 L 67 -47.2592 L 70 -48.0913 L 73 -48.7756 L 76 -49.31 L 79 -49.693 L 82 -49.9232 L 85 -50 L 88 -49.9232 L 91 -49.693 L 94 -49.31 L 97 -48.7756 L 100 -48.0913 L 103 -47.2592 L 106 -46.2819 L 109 -45.1624 L 112 -43.9041 L 115 -42.5109 L 118 -40.987 L 121 -39.3372 L 124 -37.5666 L 127 -35.6805 L 130 -33.6848 L 133 -31.5856 L 136 -29.3893 L 139 -27.1027 L 142 -24.7328 L 145 -22.2869 L 148 -19.7726 L 151 -17.1974 L 154 -14.5695 L 157 -11.8968 L 160 -9.18748 L 163 -6.44996 L 166 -3.69263 L 169 -0.923945" fill="none" stroke="#67BA48" stroke-width="11" stroke-dasharray="25 105" stroke-dashoffset="0" stroke-linecap="butt"/>
+<path d="M -170 0 L -167 2.77057 L -164 5.53263 L -161 8.27769 L -158 10.9973 L -155 13.6831 L -152 16.3269 L -149 18.9206 L -146 21.456 L -143 23.9256 L -140 26.3216 L -137 28.6368 L -134 30.8639 L -131 32.9962 L -128 35.0272 L -125 36.9504 L -122 38.7602 L -119 40.4508 L -116 42.0172 L -113 43.4544 L -110 44.7582 L -107 45.9243 L -104 46.9494 L -101 47.8302 L -98 48.5641 L -95 49.1487 L -92 49.5822 L -89 49.8635 L -86 49.9915 L -83 49.9659 L -80 49.7867 L -77 49.4546 L -74 48.9705 L -71 48.3359 L -68 47.5528 L -65 46.6236 L -62 45.5511 L -59 44.3387 L -56 42.99 L -53 41.5092 L -50 39.9009 L -47 38.1699 L -44 36.3217 L -41 34.3618 L -38 32.2964 L -35 30.1317 L -32 27.8745 L -29 25.5316 L -26 23.1102 L -23 20.6178 L -20 18.0621 L -17 15.4508 L -14 12.7921 L -11 10.0941 L -8 7.36508 L -5 4.61342 L -2 1.84757 L 1 -0.923945 L 4 -3.69263 L 7 -6.44996 L 10 -9.18748 L 13 -11.8968 L 16 -14.5695 L 19 -17.1974 L 22 -19.7726 L 25 -22.2869 L 28 -24.7328 L 31 -27.1027 L 34 -29.3893 L 37 -31.5856 L 40 -33.6848 L 43 -35.6805 L 46 -37.5666 L 49 -39.3372 L 52 -40.987 L 55 -42.5109 L 58 -43.9041 L 61 -45.1624 L 64 -46.2819 L 67 -47.2592 L 70 -48.0913 L 73 -48.7756 L 76 -49.31 L 79 -49.693 L 82 -49.9232 L 85 -50 L 88 -49.9232 L 91 -49.693 L 94 -49.31 L 97 -48.7756 L 100 -48.0913 L 103 -47.2592 L 106 -46.2819 L 109 -45.1624 L 112 -43.9041 L 115 -42.5109 L 118 -40.987 L 121 -39.3372 L 124 -37.5666 L 127 -35.6805 L 130 -33.6848 L 133 -31.5856 L 136 -29.3893 L 139 -27.1027 L 142 -24.7328 L 145 -22.2869 L 148 -19.7726 L 151 -17.1974 L 154 -14.5695 L 157 -11.8968 L 160 -9.18748 L 163 -6.44996 L 166 -3.69263 L 169 -0.923945" fill="none" stroke="#F1A43D" stroke-width="11" stroke-dasharray="25 105" stroke-dashoffset="-42" stroke-linecap="butt"/>
+<path d="M -170 0 L -167 2.77057 L -164 5.53263 L -161 8.27769 L -158 10.9973 L -155 13.6831 L -152 16.3269 L -149 18.9206 L -146 21.456 L -143 23.9256 L -140 26.3216 L -137 28.6368 L -134 30.8639 L -131 32.9962 L -128 35.0272 L -125 36.9504 L -122 38.7602 L -119 40.4508 L -116 42.0172 L -113 43.4544 L -110 44.7582 L -107 45.9243 L -104 46.9494 L -101 47.8302 L -98 48.5641 L -95 49.1487 L -92 49.5822 L -89 49.8635 L -86 49.9915 L -83 49.9659 L -80 49.7867 L -77 49.4546 L -74 48.9705 L -71 48.3359 L -68 47.5528 L -65 46.6236 L -62 45.5511 L -59 44.3387 L -56 42.99 L -53 41.5092 L -50 39.9009 L -47 38.1699 L -44 36.3217 L -41 34.3618 L -38 32.2964 L -35 30.1317 L -32 27.8745 L -29 25.5316 L -26 23.1102 L -23 20.6178 L -20 18.0621 L -17 15.4508 L -14 12.7921 L -11 10.0941 L -8 7.36508 L -5 4.61342 L -2 1.84757 L 1 -0.923945 L 4 -3.69263 L 7 -6.44996 L 10 -9.18748 L 13 -11.8968 L 16 -14.5695 L 19 -17.1974 L 22 -19.7726 L 25 -22.2869 L 28 -24.7328 L 31 -27.1027 L 34 -29.3893 L 37 -31.5856 L 40 -33.6848 L 43 -35.6805 L 46 -37.5666 L 49 -39.3372 L 52 -40.987 L 55 -42.5109 L 58 -43.9041 L 61 -45.1624 L 64 -46.2819 L 67 -47.2592 L 70 -48.0913 L 73 -48.7756 L 76 -49.31 L 79 -49.693 L 82 -49.9232 L 85 -50 L 88 -49.9232 L 91 -49.693 L 94 -49.31 L 97 -48.7756 L 100 -48.0913 L 103 -47.2592 L 106 -46.2819 L 109 -45.1624 L 112 -43.9041 L 115 -42.5109 L 118 -40.987 L 121 -39.3372 L 124 -37.5666 L 127 -35.6805 L 130 -33.6848 L 133 -31.5856 L 136 -29.3893 L 139 -27.1027 L 142 -24.7328 L 145 -22.2869 L 148 -19.7726 L 151 -17.1974 L 154 -14.5695 L 157 -11.8968 L 160 -9.18748 L 163 -6.44996 L 166 -3.69263 L 169 -0.923945" fill="none" stroke="#17ABA5" stroke-width="11" stroke-dasharray="25 105" stroke-dashoffset="-84" stroke-linecap="butt"/>
+<path d="M -170 -0 L -167 -2.77057 L -164 -5.53263 L -161 -8.27769 L -158 -10.9973 L -155 -13.6831 L -152 -16.3269 L -149 -18.9206 L -146 -21.456 L -143 -23.9256 L -140 -26.3216 L -137 -28.6368 L -134 -30.8639 L -131 -32.9962 L -128 -35.0272 L -125 -36.9504 L -122 -38.7602 L -119 -40.4508 L -116 -42.0172 L -113 -43.4544 L -110 -44.7582 L -107 -45.9243 L -104 -46.9494 L -101 -47.8302 L -98 -48.5641 L -95 -49.1487 L -92 -49.5822 L -89 -49.8635 L -86 -49.9915 L -83 -49.9659 L -80 -49.7867 L -77 -49.4546 L -74 -48.9705 L -71 -48.3359 L -68 -47.5528 L -65 -46.6236 L -62 -45.5511 L -59 -44.3387 L -56 -42.99 L -53 -41.5092 L -50 -39.9009 L -47 -38.1699 L -44 -36.3217 L -41 -34.3618 L -38 -32.2964 L -35 -30.1317 L -32 -27.8745 L -29 -25.5316 L -26 -23.1102 L -23 -20.6178 L -20 -18.0621 L -17 -15.4508 L -14 -12.7921 L -11 -10.0941 L -8 -7.36508 L -5 -4.61342 L -2 -1.84757 L 1 0.923945 L 4 3.69263 L 7 6.44996 L 10 9.18748 L 13 11.8968 L 16 14.5695 L 19 17.1974 L 22 19.7726 L 25 22.2869 L 28 24.7328 L 31 27.1027 L 34 29.3893 L 37 31.5856 L 40 33.6848 L 43 35.6805 L 46 37.5666 L 49 39.3372 L 52 40.987 L 55 42.5109 L 58 43.9041 L 61 45.1624 L 64 46.2819 L 67 47.2592 L 70 48.0913 L 73 48.7756 L 76 49.31 L 79 49.693 L 82 49.9232 L 85 50 L 88 49.9232 L 91 49.693 L 94 49.31 L 97 48.7756 L 100 48.0913 L 103 47.2592 L 106 46.2819 L 109 45.1624 L 112 43.9041 L 115 42.5109 L 118 40.987 L 121 39.3372 L 124 37.5666 L 127 35.6805 L 130 33.6848 L 133 31.5856 L 136 29.3893 L 139 27.1027 L 142 24.7328 L 145 22.2869 L 148 19.7726 L 151 17.1974 L 154 14.5695 L 157 11.8968 L 160 9.18748 L 163 6.44996 L 166 3.69263 L 169 0.923945" fill="none" stroke="#192A35" stroke-width="18" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M -170 -0 L -167 -2.77057 L -164 -5.53263 L -161 -8.27769 L -158 -10.9973 L -155 -13.6831 L -152 -16.3269 L -149 -18.9206 L -146 -21.456 L -143 -23.9256 L -140 -26.3216 L -137 -28.6368 L -134 -30.8639 L -131 -32.9962 L -128 -35.0272 L -125 -36.9504 L -122 -38.7602 L -119 -40.4508 L -116 -42.0172 L -113 -43.4544 L -110 -44.7582 L -107 -45.9243 L -104 -46.9494 L -101 -47.8302 L -98 -48.5641 L -95 -49.1487 L -92 -49.5822 L -89 -49.8635 L -86 -49.9915 L -83 -49.9659 L -80 -49.7867 L -77 -49.4546 L -74 -48.9705 L -71 -48.3359 L -68 -47.5528 L -65 -46.6236 L -62 -45.5511 L -59 -44.3387 L -56 -42.99 L -53 -41.5092 L -50 -39.9009 L -47 -38.1699 L -44 -36.3217 L -41 -34.3618 L -38 -32.2964 L -35 -30.1317 L -32 -27.8745 L -29 -25.5316 L -26 -23.1102 L -23 -20.6178 L -20 -18.0621 L -17 -15.4508 L -14 -12.7921 L -11 -10.0941 L -8 -7.36508 L -5 -4.61342 L -2 -1.84757 L 1 0.923945 L 4 3.69263 L 7 6.44996 L 10 9.18748 L 13 11.8968 L 16 14.5695 L 19 17.1974 L 22 19.7726 L 25 22.2869 L 28 24.7328 L 31 27.1027 L 34 29.3893 L 37 31.5856 L 40 33.6848 L 43 35.6805 L 46 37.5666 L 49 39.3372 L 52 40.987 L 55 42.5109 L 58 43.9041 L 61 45.1624 L 64 46.2819 L 67 47.2592 L 70 48.0913 L 73 48.7756 L 76 49.31 L 79 49.693 L 82 49.9232 L 85 50 L 88 49.9232 L 91 49.693 L 94 49.31 L 97 48.7756 L 100 48.0913 L 103 47.2592 L 106 46.2819 L 109 45.1624 L 112 43.9041 L 115 42.5109 L 118 40.987 L 121 39.3372 L 124 37.5666 L 127 35.6805 L 130 33.6848 L 133 31.5856 L 136 29.3893 L 139 27.1027 L 142 24.7328 L 145 22.2869 L 148 19.7726 L 151 17.1974 L 154 14.5695 L 157 11.8968 L 160 9.18748 L 163 6.44996 L 166 3.69263 L 169 0.923945" fill="none" stroke="#A365D3" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M -170 -0 L -167 -2.77057 L -164 -5.53263 L -161 -8.27769 L -158 -10.9973 L -155 -13.6831 L -152 -16.3269 L -149 -18.9206 L -146 -21.456 L -143 -23.9256 L -140 -26.3216 L -137 -28.6368 L -134 -30.8639 L -131 -32.9962 L -128 -35.0272 L -125 -36.9504 L -122 -38.7602 L -119 -40.4508 L -116 -42.0172 L -113 -43.4544 L -110 -44.7582 L -107 -45.9243 L -104 -46.9494 L -101 -47.8302 L -98 -48.5641 L -95 -49.1487 L -92 -49.5822 L -89 -49.8635 L -86 -49.9915 L -83 -49.9659 L -80 -49.7867 L -77 -49.4546 L -74 -48.9705 L -71 -48.3359 L -68 -47.5528 L -65 -46.6236 L -62 -45.5511 L -59 -44.3387 L -56 -42.99 L -53 -41.5092 L -50 -39.9009 L -47 -38.1699 L -44 -36.3217 L -41 -34.3618 L -38 -32.2964 L -35 -30.1317 L -32 -27.8745 L -29 -25.5316 L -26 -23.1102 L -23 -20.6178 L -20 -18.0621 L -17 -15.4508 L -14 -12.7921 L -11 -10.0941 L -8 -7.36508 L -5 -4.61342 L -2 -1.84757 L 1 0.923945 L 4 3.69263 L 7 6.44996 L 10 9.18748 L 13 11.8968 L 16 14.5695 L 19 17.1974 L 22 19.7726 L 25 22.2869 L 28 24.7328 L 31 27.1027 L 34 29.3893 L 37 31.5856 L 40 33.6848 L 43 35.6805 L 46 37.5666 L 49 39.3372 L 52 40.987 L 55 42.5109 L 58 43.9041 L 61 45.1624 L 64 46.2819 L 67 47.2592 L 70 48.0913 L 73 48.7756 L 76 49.31 L 79 49.693 L 82 49.9232 L 85 50 L 88 49.9232 L 91 49.693 L 94 49.31 L 97 48.7756 L 100 48.0913 L 103 47.2592 L 106 46.2819 L 109 45.1624 L 112 43.9041 L 115 42.5109 L 118 40.987 L 121 39.3372 L 124 37.5666 L 127 35.6805 L 130 33.6848 L 133 31.5856 L 136 29.3893 L 139 27.1027 L 142 24.7328 L 145 22.2869 L 148 19.7726 L 151 17.1974 L 154 14.5695 L 157 11.8968 L 160 9.18748 L 163 6.44996 L 166 3.69263 L 169 0.923945" fill="none" stroke="#67BA48" stroke-width="11" stroke-dasharray="25 105" stroke-dashoffset="0" stroke-linecap="butt"/>
+<path d="M -170 -0 L -167 -2.77057 L -164 -5.53263 L -161 -8.27769 L -158 -10.9973 L -155 -13.6831 L -152 -16.3269 L -149 -18.9206 L -146 -21.456 L -143 -23.9256 L -140 -26.3216 L -137 -28.6368 L -134 -30.8639 L -131 -32.9962 L -128 -35.0272 L -125 -36.9504 L -122 -38.7602 L -119 -40.4508 L -116 -42.0172 L -113 -43.4544 L -110 -44.7582 L -107 -45.9243 L -104 -46.9494 L -101 -47.8302 L -98 -48.5641 L -95 -49.1487 L -92 -49.5822 L -89 -49.8635 L -86 -49.9915 L -83 -49.9659 L -80 -49.7867 L -77 -49.4546 L -74 -48.9705 L -71 -48.3359 L -68 -47.5528 L -65 -46.6236 L -62 -45.5511 L -59 -44.3387 L -56 -42.99 L -53 -41.5092 L -50 -39.9009 L -47 -38.1699 L -44 -36.3217 L -41 -34.3618 L -38 -32.2964 L -35 -30.1317 L -32 -27.8745 L -29 -25.5316 L -26 -23.1102 L -23 -20.6178 L -20 -18.0621 L -17 -15.4508 L -14 -12.7921 L -11 -10.0941 L -8 -7.36508 L -5 -4.61342 L -2 -1.84757 L 1 0.923945 L 4 3.69263 L 7 6.44996 L 10 9.18748 L 13 11.8968 L 16 14.5695 L 19 17.1974 L 22 19.7726 L 25 22.2869 L 28 24.7328 L 31 27.1027 L 34 29.3893 L 37 31.5856 L 40 33.6848 L 43 35.6805 L 46 37.5666 L 49 39.3372 L 52 40.987 L 55 42.5109 L 58 43.9041 L 61 45.1624 L 64 46.2819 L 67 47.2592 L 70 48.0913 L 73 48.7756 L 76 49.31 L 79 49.693 L 82 49.9232 L 85 50 L 88 49.9232 L 91 49.693 L 94 49.31 L 97 48.7756 L 100 48.0913 L 103 47.2592 L 106 46.2819 L 109 45.1624 L 112 43.9041 L 115 42.5109 L 118 40.987 L 121 39.3372 L 124 37.5666 L 127 35.6805 L 130 33.6848 L 133 31.5856 L 136 29.3893 L 139 27.1027 L 142 24.7328 L 145 22.2869 L 148 19.7726 L 151 17.1974 L 154 14.5695 L 157 11.8968 L 160 9.18748 L 163 6.44996 L 166 3.69263 L 169 0.923945" fill="none" stroke="#F1A43D" stroke-width="11" stroke-dasharray="25 105" stroke-dashoffset="-42" stroke-linecap="butt"/>
+<path d="M -170 -0 L -167 -2.77057 L -164 -5.53263 L -161 -8.27769 L -158 -10.9973 L -155 -13.6831 L -152 -16.3269 L -149 -18.9206 L -146 -21.456 L -143 -23.9256 L -140 -26.3216 L -137 -28.6368 L -134 -30.8639 L -131 -32.9962 L -128 -35.0272 L -125 -36.9504 L -122 -38.7602 L -119 -40.4508 L -116 -42.0172 L -113 -43.4544 L -110 -44.7582 L -107 -45.9243 L -104 -46.9494 L -101 -47.8302 L -98 -48.5641 L -95 -49.1487 L -92 -49.5822 L -89 -49.8635 L -86 -49.9915 L -83 -49.9659 L -80 -49.7867 L -77 -49.4546 L -74 -48.9705 L -71 -48.3359 L -68 -47.5528 L -65 -46.6236 L -62 -45.5511 L -59 -44.3387 L -56 -42.99 L -53 -41.5092 L -50 -39.9009 L -47 -38.1699 L -44 -36.3217 L -41 -34.3618 L -38 -32.2964 L -35 -30.1317 L -32 -27.8745 L -29 -25.5316 L -26 -23.1102 L -23 -20.6178 L -20 -18.0621 L -17 -15.4508 L -14 -12.7921 L -11 -10.0941 L -8 -7.36508 L -5 -4.61342 L -2 -1.84757 L 1 0.923945 L 4 3.69263 L 7 6.44996 L 10 9.18748 L 13 11.8968 L 16 14.5695 L 19 17.1974 L 22 19.7726 L 25 22.2869 L 28 24.7328 L 31 27.1027 L 34 29.3893 L 37 31.5856 L 40 33.6848 L 43 35.6805 L 46 37.5666 L 49 39.3372 L 52 40.987 L 55 42.5109 L 58 43.9041 L 61 45.1624 L 64 46.2819 L 67 47.2592 L 70 48.0913 L 73 48.7756 L 76 49.31 L 79 49.693 L 82 49.9232 L 85 50 L 88 49.9232 L 91 49.693 L 94 49.31 L 97 48.7756 L 100 48.0913 L 103 47.2592 L 106 46.2819 L 109 45.1624 L 112 43.9041 L 115 42.5109 L 118 40.987 L 121 39.3372 L 124 37.5666 L 127 35.6805 L 130 33.6848 L 133 31.5856 L 136 29.3893 L 139 27.1027 L 142 24.7328 L 145 22.2869 L 148 19.7726 L 151 17.1974 L 154 14.5695 L 157 11.8968 L 160 9.18748 L 163 6.44996 L 166 3.69263 L 169 0.923945" fill="none" stroke="#17ABA5" stroke-width="11" stroke-dasharray="25 105" stroke-dashoffset="-84" stroke-linecap="butt"/>
+<text x="0" y="124" font-size="69" fill="#192A35" text-anchor="middle" font-weight="700">HiFi</text>
+<text x="0" y="156" font-size="18" fill="#5C6870" text-anchor="middle">GENOME ASSEMBLY</text>
+</g>
+<circle cx="1703" cy="1235" r="16" fill="#e6f5ea" stroke="#9DD6AB" stroke-width="2.5"/>
+<text x="1703" y="1240" font-size="12" fill="#192A35" text-anchor="middle" font-weight="700">QC</text>
+<text x="1730" y="1241" font-size="16" fill="#5C6870" text-anchor="start">Assembly QC checkpoint</text>
+<text x="64" y="1261" font-size="16" fill="#5C6870" text-anchor="start">Blue ellipses: required data. Dashed nodes/routes: optional modules. See the QC map for model, final-mapping and optional-analysis scopes.</text>
+</g>
+</svg>

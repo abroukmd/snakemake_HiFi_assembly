@@ -1,0 +1,9 @@
+name: heterozygosity
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.12
+  - bcftools=1.22
+  - samtools=1.22.1
+  - htslib=1.22.1

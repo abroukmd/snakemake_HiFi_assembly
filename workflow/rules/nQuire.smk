@@ -15,7 +15,8 @@ NQ_COMMIT = config.get("nquire", {}).get("commit", "")
 
 rule install_nquire:
     output:
-        done=NQ_DONE
+        done=NQ_DONE,
+        binary=NQ_BIN
     params:
         repo=NQ_REPO,
         commit=NQ_COMMIT,
@@ -76,33 +77,28 @@ rule nquire_ploidy:
     input:
         # ensure nQuire is installed
         nq_done=NQ_DONE,
+        binary=NQ_BIN,
         # ensure mapping exists
         mapping_done=outpath("Assemblies/{sample}/QC/Mapping/mapping_qc.done"),
-        bam=outpath("Assemblies/{sample}/QC/Mapping/purged-hifiasm.bam"),
+        bam=get_nquire_bam,
+        helper=workflow.source_path("../scripts/run_nquire.py"),
     output:
         results=outpath("Assemblies/{sample}/QC/nQuire/{sample}_nquire.results"),
         ploidy=outpath("Assemblies/{sample}/QC/nQuire/{sample}_ploidy.tsv"),
+        summary=outpath("Assemblies/{sample}/QC/nQuire/{sample}_nquire.summary.json"),
         done=outpath("Assemblies/{sample}/QC/nQuire/nquire.done"),
     log:
-        out=outpath("Assemblies/{sample}/QC/nQuire/{sample}.nquire.log"),
+        out=outpath("Assemblies/{sample}/logs/nquire.runner.log"),
+    params:
+        outdir=lambda wc: outpath(f"Assemblies/{wc.sample}/QC/nQuire"),
+        revision=NQ_COMMIT,
     threads: 32
     conda:
         "../envs/genomescope2_env.yaml"
     shell:
         r"""
         set -euo pipefail
-        set -x
-
-        OUTDIR="$(dirname "{output.done}")"
-        mkdir -p "$OUTDIR"
-        cd "$OUTDIR"
-
-        "{NQ_BIN}" create -b "{input.bam}" -o "{wildcards.sample}" >> "{log.out}" 2>&1
-        "{NQ_BIN}" denoise "{wildcards.sample}.bin" -o "{wildcards.sample}-denoised" >> "{log.out}" 2>&1
-        "{NQ_BIN}" lrdmodel -t {threads} "{wildcards.sample}-denoised.bin" > "{output.results}" 2>> "{log.out}"
-
-        awk -F'\t' 'NR==1 {{next}} {{min=$6; pl="2"; if($7<min){{min=$7; pl="3"}} if($8<min){{pl="4"}} print $1, pl}}' \
-          "{output.results}" | sed 's/-denoised.bin//g' > "{output.ploidy}"
-
-        touch "{output.done}"
+        python {input.helper:q} --executable {input.binary:q} --bam {input.bam:q} \
+            --outdir {params.outdir:q} --sample {wildcards.sample:q} --threads {threads} \
+            --revision {params.revision:q} > {log.out:q} 2>&1
         """

@@ -5,5 +5,3 @@ channels:
   - defaults
 dependencies:
   - chromeister
-build:
-  script: ./post-link.sh

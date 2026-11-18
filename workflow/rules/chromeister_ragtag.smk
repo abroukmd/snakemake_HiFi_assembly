@@ -1,25 +1,17 @@
-import pandas as pd
+# Optional RagTag comparisons; included only when explicitly enabled.
+import os
 
-# Load sample sheet
-samples_df = pd.read_csv(config["sample_sheet"], sep="\t").set_index("sample")
-
-# Samples that require RagTag
-RAGTAG_SAMPLES = samples_df.query("ragtag == 'Y'").index.tolist()
-
-
-##############################################
-#   Chromeister on Purged RagTag Assembly
-##############################################
 rule chromeister_ragtag_purged:
     input:
-        asm = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.hifiasm.reforder.fasta"),
-        ref = lambda wc: samples_df.loc[wc.sample, "Ref"],
-        ragtag_done = outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_purged.done")
+        query = outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.hifiasm.reforder.fasta"),
+        ref = lambda wc: sample_refs[wc.sample],
+        runner = os.path.join(workflow.basedir, "scripts", "run_chromeister.sh"),
+        assembly_done = outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_purged.done")
     output:
-        mat   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat"),
-        png   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.filt.png"),
+        mat = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat"),
+        png = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.mat.filt.png"),
         score = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag_score.txt"),
-        done  = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done")
+        done = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_ragtag.done")
     log:
         out = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.log"),
         err = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_ragtag.err")
@@ -27,64 +19,26 @@ rule chromeister_ragtag_purged:
         "../envs/chromeister_env.yaml"
     threads: 1
     wildcard_constraints:
-        sample="|".join(RAGTAG_SAMPLES)
+        sample = "|".join(RAGTAG_SAMPLES) or "(?!)"
     shell:
         r"""
-        set -euo pipefail
-
-        OUTDIR=$(dirname {output.mat})
-        mkdir -p "$OUTDIR"
-
-        # Resolve scaffold path
-        ASM_ABS=$(realpath {input.asm}) || {{ echo "Missing assembly: {input.asm}" >&2; exit 1; }}
-
-        # Prepare reference
-        REF_FILE="{input.ref}"
-        if [[ "$REF_FILE" == *.gz ]]; then
-            BASENAME=$(basename "$REF_FILE" .gz)
-            gunzip -c "$REF_FILE" > "$OUTDIR/$BASENAME"
-            REF_FILE="$OUTDIR/$BASENAME"
-        fi
-
-        # Run Chromeister
-        CHROMEISTER -query "$REF_FILE" \
-                    -db "$ASM_ABS" \
-                    -out "{output.mat}" \
-                    -dimension 2000 \
-                    > "{log.out}" 2>> "{log.err}"
-
-        # Compute score
-        Rscript $(which compute_score.R) "{output.mat}" 2000 \
-            > "{output.score}" 2>> "{log.err}"
-
-        # PNG rendering by Chromeister
-        if [[ -f "{output.mat}.png" ]]; then
-            mv "{output.mat}.png" "{output.png}"
-        fi
-
-        # Remove decompressed reference (temporary)
-        if [[ "$REF_FILE" == "$OUTDIR/"* && "$REF_FILE" != *.fa && "$REF_FILE" != *.fna && "$REF_FILE" != *.fasta ]]; then
-            rm -f "$REF_FILE"
-        fi
-
-        touch "{output.done}"
+        bash {input.runner:q} {input.query:q} {input.ref:q} \
+            {output.mat:q} {output.png:q} {output.score:q} {output.done:q} \
+            {log.out:q} {log.err:q} 0
         """
 
 
-##############################################
-#   Chromeister on Purged RagTag LJA Assembly
-##############################################
-
 rule chromeister_ragtag_lja:
     input:
-        asm = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.lja.reforder.fasta"),
-        ref = lambda wc: samples_df.loc[wc.sample, "Ref"],
-        ragtag_done = outpath("Assemblies/{sample}/RAGTAG_LJA/{sample}_ragtag_lja.done")
+        query = outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.lja.reforder.fasta"),
+        ref = lambda wc: sample_refs[wc.sample],
+        runner = os.path.join(workflow.basedir, "scripts", "run_chromeister.sh"),
+        assembly_done = outpath("Assemblies/{sample}/RAGTAG_LJA/{sample}_ragtag_lja.done")
     output:
-        mat   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat"),
-        png   = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat.filt.png"),
+        mat = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat"),
+        png = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.mat.filt.png"),
         score = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag_score.txt"),
-        done  = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_lja_ragtag.done")
+        done = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/.purged_lja_ragtag.done")
     log:
         out = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.log"),
         err = outpath("Assemblies/{sample}/CHROMEISTER_RAGTAG/{sample}-purged_lja_ragtag.err")
@@ -92,60 +46,10 @@ rule chromeister_ragtag_lja:
         "../envs/chromeister_env.yaml"
     threads: 1
     wildcard_constraints:
-        sample="|".join(RAGTAG_SAMPLES)
+        sample = "|".join(RAGTAG_SAMPLES) or "(?!)"
     shell:
         r"""
-        set -euo pipefail
-
-        OUTDIR=$(dirname {output.mat})
-        mkdir -p "$OUTDIR"
-
-        # ---------------------------------
-        # Resolve the sorted RagTag assembly
-        # ---------------------------------
-        ASM_ABS=$(realpath {input.asm}) \
-            || {{ echo "[ERROR] Missing assembly: {input.asm}" >&2; exit 1; }}
-
-        # ---------------------------------
-        # Prepare reference (handle .gz)
-        # ---------------------------------
-        REF_FILE="{input.ref}"
-        if [[ "$REF_FILE" == *.gz ]]; then
-            BASENAME=$(basename "$REF_FILE" .gz)
-            gunzip -c "$REF_FILE" > "$OUTDIR/$BASENAME"
-            REF_FILE="$OUTDIR/$BASENAME"
-        fi
-
-        echo "[INFO] Running Chromeister on LJA RagTag assembly" >> {log.out}
-
-        # ---------------------------------
-        # Chromeister alignment
-        # ---------------------------------
-        CHROMEISTER -query "$REF_FILE" \
-                    -db "$ASM_ABS" \
-                    -out "{output.mat}" \
-                    -dimension 2000 \
-                    >> "{log.out}" 2>> "{log.err}"
-
-        # ---------------------------------
-        # Compute score
-        # ---------------------------------
-        Rscript $(which compute_score.R) "{output.mat}" 2000 \
-            > "{output.score}" 2>> "{log.err}"
-
-        # ---------------------------------
-        # Collect PNG if generated
-        # ---------------------------------
-        if [[ -f "{output.mat}.png" ]]; then
-            mv "{output.mat}.png" "{output.png}"
-        fi
-
-        # ---------------------------------
-        # Cleanup temporary reference
-        # ---------------------------------
-        if [[ "$REF_FILE" == "$OUTDIR/"* ]]; then
-            rm -f "$REF_FILE"
-        fi
-
-        touch "{output.done}"
+        bash {input.runner:q} {input.query:q} {input.ref:q} \
+            {output.mat:q} {output.png:q} {output.score:q} {output.done:q} \
+            {log.out:q} {log.err:q} 0
         """

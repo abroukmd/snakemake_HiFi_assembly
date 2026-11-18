@@ -20,16 +20,18 @@ rule hifiasm:
 
         mkdir -p Assemblies/{wildcards.sample}/HIFIASM
 
-        echo "[INFO] Running Hifiasm for {wildcards.sample}" > {log}
+        echo "[INFO] Running Hifiasm for {wildcards.sample}" > {log:q}
         hifiasm -o Assemblies/{wildcards.sample}/HIFIASM/{wildcards.sample} \
-                 -t {threads} {input.fastq} >> {log} 2>&1
+                 -t {threads} {input.fastq:q} >> {log:q} 2>&1
 
         # Convert GFA to FASTA
         awk '/^S/{{print ">"$2"\n"$3}}' \
             Assemblies/{wildcards.sample}/HIFIASM/{wildcards.sample}.bp.p_ctg.gfa \
-            > {output.fasta}
+            > {output.fasta:q}
 
-        touch {output.done}
+        test -s {output.fasta:q}
+        grep -q '^>' {output.fasta:q}
+        touch {output.done:q}
         """
 
 
@@ -51,25 +53,25 @@ rule lja:
         r"""
         set -euo pipefail
 
-        echo "[INFO] Running LJA for {wildcards.sample}" > {log}
-        mkdir -p {params.out_dir}
+        echo "[INFO] Running LJA for {wildcards.sample}" > {log:q}
+        mkdir -p {params.out_dir:q}
 
         # Run LJA with full absolute output path
-        lja --reads {input.fastq} \
-            -o {params.out_dir} \
-            --threads {threads} >> {log} 2>&1
+        lja --reads {input.fastq:q} \
+            -o {params.out_dir:q} \
+            --threads {threads} >> {log:q} 2>&1
 
-        echo "[INFO] Listing contents of {params.out_dir}" >> {log}
-        ls -lh {params.out_dir} >> {log}
+        echo "[INFO] Listing LJA output files" >> {log:q}
+        ls -lh {params.out_dir:q} >> {log:q}
 
         # Check expected output
-        if [[ ! -f {params.out_dir}/assembly.fasta ]]; then
-            echo "[ERROR] LJA did not produce assembly.fasta" >&2
-            echo "[ERROR] LJA did not produce assembly.fasta" >> {log}
+        if [[ ! -s {output.fasta:q} ]] || ! grep -q '^>' {output.fasta:q}; then
+            echo "[ERROR] LJA did not produce a nonempty assembly FASTA" >&2
+            echo "[ERROR] LJA did not produce a nonempty assembly FASTA" >> {log:q}
             exit 1
         fi
 
         # Mark completion
-        touch {output.done}
+        touch {output.done:q}
         """
 

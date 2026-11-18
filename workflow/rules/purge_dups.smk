@@ -1,6 +1,14 @@
-PURGE_LOW = int(config.get("purge_dups_low", 5))
-PURGE_MID = int(config.get("purge_dups_mid", 35))
-PURGE_HIGH = int(config.get("purge_dups_high", 90))
+# Preserve the historical overlap-only behavior explicitly. Coverage thresholds
+# require read-depth estimation, which this workflow does not currently provide.
+if config.get("purge_dups_mode", "overlap_only") != "overlap_only":
+    raise ValueError("Only purge_dups_mode: overlap_only is currently supported")
+_unused_depth_keys = {"purge_dups_low", "purge_dups_mid", "purge_dups_high"} & set(config)
+if _unused_depth_keys:
+    raise ValueError(
+        "Depth thresholds are unsupported in overlap-only purging: "
+        + ", ".join(sorted(_unused_depth_keys))
+        + ". Remove these settings; coverage-based purging requires coverage input."
+    )
 
 
 def _purge_len_sorted_path(sample, asm):
@@ -33,10 +41,6 @@ rule purge_dups:
     conda:
         "../envs/purge_dups.yaml"
     threads: 24
-    params:
-        low  = PURGE_LOW,
-        mid  = PURGE_MID,
-        high = PURGE_HIGH
     shell:
         r"""
         set -euo pipefail
@@ -81,12 +85,6 @@ rule purge_dups:
             rm -f "$tmp_oneline"
         }}
 
-        cat > cutoffs <<EOF
-low={params.low}
-mid={params.mid}
-high={params.high}
-EOF
-
         echo "[INFO] split_fa on {input.asm}" > "{log.out}"
         split_fa "{input.asm}" > "{output.split}" 2>> "{log.err}"
 
@@ -100,17 +98,22 @@ EOF
         minimap2 -xasm5 -DP -t {threads} "{output.split}" "{output.split}" \
             | gzip -c > "{output.paf}" 2>> "{log.err}"
 
-        echo "[INFO] purge_dups -2 -T cutoffs (no PB.base.cov)" >> "{log.out}"
-        purge_dups -2 -T cutoffs "{output.paf}" > "{output.bed}" 2>> "{log.err}"
+        echo "[INFO] purge_dups -2 (explicit overlap-only mode; no coverage classification)" >> "{log.out}"
+        purge_dups -2 "{output.paf}" > "{output.bed}" 2>> "{log.err}"
 
-        awk 'BEGIN{{OFS="\t"}} $2~/^[0-9]+$/ && $3~/^[0-9]+$/ && $3>$2{{print}}' \
-            "{output.bed}" > "{output.clean_bed}"
+        awk 'BEGIN{{OFS="\t"}}
+             NF==0 {{next}}
+             NF<3 || $2!~/^[0-9]+$/ || $3!~/^[0-9]+$/ || $3<=$2 {{
+                 print "[ERROR] Invalid purge_dups BED record at line " NR > "/dev/stderr";
+                 exit 1
+             }}
+             {{print}}' "{output.bed}" > "{output.clean_bed}"
 
         clean_bed_n=$(wc -l < "{output.clean_bed}" | tr -d ' ')
         echo "[INFO] clean BED lines: $clean_bed_n" >> "{log.out}"
 
         fasta_to_oneline "{input.asm}" "{output.oneline}"
-        samtools faidx "{output.oneline}" >> "{log.out}" 2>> "{log.err}" || true
+        samtools faidx "{output.oneline}" >> "{log.out}" 2>> "{log.err}"
 
         if [[ "$clean_bed_n" -eq 0 ]]; then
             echo "[INFO] BED empty after cleaning; copying original assembly" >> "{log.out}"
@@ -119,26 +122,17 @@ EOF
         else
             echo "[INFO] Running get_seqs -e -c" >> "{log.out}"
             rm -f purged.fa hap.fa
-            set +e
             get_seqs -e -c "{output.clean_bed}" "{output.oneline}" >> "{log.out}" 2>> "{log.err}"
-            rc=$?
-            set -e
-
-            if [[ $rc -ne 0 ]]; then
-                echo "[WARN] get_seqs failed (exit $rc); falling back to original assembly" >> "{log.out}"
-                cp -f "{input.asm}" "{output.purge}"
-                echo -e ">hap_empty\nN" > "{output.hap}"
-            elif [[ ! -f purged.fa || ! -s purged.fa ]]; then
-                echo "[WARN] purged.fa missing/empty after get_seqs; falling back" >> "{log.out}"
-                cp -f "{input.asm}" "{output.purge}"
-                echo -e ">hap_empty\nN" > "{output.hap}"
+            if [[ ! -s purged.fa ]] || ! grep -q '^>' purged.fa; then
+                echo "[ERROR] get_seqs did not produce a nonempty purged FASTA" >> "{log.err}"
+                exit 1
+            fi
+            mv -f purged.fa "{output.purge}"
+            if [[ -f hap.fa && -s hap.fa ]]; then
+                mv -f hap.fa "{output.hap}"
             else
-                mv -f purged.fa "{output.purge}"
-                if [[ -f hap.fa && -s hap.fa ]]; then
-                    mv -f hap.fa "{output.hap}"
-                else
-                    echo -e ">hap_empty\nN" > "{output.hap}"
-                fi
+                echo "[INFO] No haplotig sequences; writing explicit hap_empty sentinel" >> "{log.out}"
+                echo -e ">hap_empty\nN" > "{output.hap}"
             fi
         fi
 
@@ -175,10 +169,6 @@ rule purge_dups_lja:
     conda:
         "../envs/purge_dups.yaml"
     threads: 24
-    params:
-        low  = PURGE_LOW,
-        mid  = PURGE_MID,
-        high = PURGE_HIGH
     shell:
         r"""
         set -euo pipefail
@@ -223,12 +213,6 @@ rule purge_dups_lja:
             rm -f "$tmp_oneline"
         }}
 
-        cat > cutoffs <<EOF
-low={params.low}
-mid={params.mid}
-high={params.high}
-EOF
-
         echo "[INFO] split_fa on {input.asm}" > "{log.out}"
         split_fa "{input.asm}" > "{output.split}" 2>> "{log.err}"
 
@@ -242,17 +226,22 @@ EOF
         minimap2 -xasm5 -DP -t {threads} "{output.split}" "{output.split}" \
             | gzip -c > "{output.paf}" 2>> "{log.err}"
 
-        echo "[INFO] purge_dups -2 -T cutoffs (no PB.base.cov)" >> "{log.out}"
-        purge_dups -2 -T cutoffs "{output.paf}" > "{output.bed}" 2>> "{log.err}"
+        echo "[INFO] purge_dups -2 (explicit overlap-only mode; no coverage classification)" >> "{log.out}"
+        purge_dups -2 "{output.paf}" > "{output.bed}" 2>> "{log.err}"
 
-        awk 'BEGIN{{OFS="\t"}} $2~/^[0-9]+$/ && $3~/^[0-9]+$/ && $3>$2{{print}}' \
-            "{output.bed}" > "{output.clean_bed}"
+        awk 'BEGIN{{OFS="\t"}}
+             NF==0 {{next}}
+             NF<3 || $2!~/^[0-9]+$/ || $3!~/^[0-9]+$/ || $3<=$2 {{
+                 print "[ERROR] Invalid purge_dups BED record at line " NR > "/dev/stderr";
+                 exit 1
+             }}
+             {{print}}' "{output.bed}" > "{output.clean_bed}"
 
         clean_bed_n=$(wc -l < "{output.clean_bed}" | tr -d ' ')
         echo "[INFO] clean BED lines: $clean_bed_n" >> "{log.out}"
 
         fasta_to_oneline "{input.asm}" "{output.oneline}"
-        samtools faidx "{output.oneline}" >> "{log.out}" 2>> "{log.err}" || true
+        samtools faidx "{output.oneline}" >> "{log.out}" 2>> "{log.err}"
 
         if [[ "$clean_bed_n" -eq 0 ]]; then
             echo "[INFO] BED empty after cleaning; copying original assembly" >> "{log.out}"
@@ -261,26 +250,17 @@ EOF
         else
             echo "[INFO] Running get_seqs -e -c" >> "{log.out}"
             rm -f purged.fa hap.fa
-            set +e
             get_seqs -e -c "{output.clean_bed}" "{output.oneline}" >> "{log.out}" 2>> "{log.err}"
-            rc=$?
-            set -e
-
-            if [[ $rc -ne 0 ]]; then
-                echo "[WARN] get_seqs failed (exit $rc); falling back to original assembly" >> "{log.out}"
-                cp -f "{input.asm}" "{output.purge}"
-                echo -e ">hap_empty\nN" > "{output.hap}"
-            elif [[ ! -f purged.fa || ! -s purged.fa ]]; then
-                echo "[WARN] purged.fa missing/empty after get_seqs; falling back" >> "{log.out}"
-                cp -f "{input.asm}" "{output.purge}"
-                echo -e ">hap_empty\nN" > "{output.hap}"
+            if [[ ! -s purged.fa ]] || ! grep -q '^>' purged.fa; then
+                echo "[ERROR] get_seqs did not produce a nonempty purged FASTA" >> "{log.err}"
+                exit 1
+            fi
+            mv -f purged.fa "{output.purge}"
+            if [[ -f hap.fa && -s hap.fa ]]; then
+                mv -f hap.fa "{output.hap}"
             else
-                mv -f purged.fa "{output.purge}"
-                if [[ -f hap.fa && -s hap.fa ]]; then
-                    mv -f hap.fa "{output.hap}"
-                else
-                    echo -e ">hap_empty\nN" > "{output.hap}"
-                fi
+                echo "[INFO] No haplotig sequences; writing explicit hap_empty sentinel" >> "{log.out}"
+                echo -e ">hap_empty\nN" > "{output.hap}"
             fi
         fi
 

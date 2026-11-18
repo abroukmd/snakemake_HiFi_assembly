@@ -1,0 +1,7 @@
+name: qc_summary
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - matplotlib=3.10

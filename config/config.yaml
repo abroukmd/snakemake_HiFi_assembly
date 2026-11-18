@@ -1,4 +1,71 @@
-project_dir: "/data3/u0176926/PacBio_Oct2025/"
-sample_sheet: "/data1/u0176926/snakemake/HIFI_assembly/config/samples.tsv"
-oatk_db: "/data1/u0176926/snakemake/HIFI_pipeline/DB/OATK_DB/Dikarya.fam"
-singularity_args: "--bind /data1"
+# Generic GitHub template. Copy to config/config.local.yaml and replace paths.
+# Copy config/samples.tsv to config/samples.local.tsv and edit its example rows.
+# All paths below, including sample_sheet, must be absolute.
+project_dir: "/absolute/path/to/hifi_project"
+sample_sheet: "/absolute/path/to/repository/config/samples.local.tsv"
+
+# Choose the mitochondrial HMM database appropriate for your samples.
+oatk_db: "/absolute/path/to/OatkDB/your_lineage_mito.fam"
+
+# Select hifiasm/LJA and RagTag per sample in the TSV. At least one core
+# assembler is required for every sample. Threads are controlled through
+# Snakemake --cores and --set-threads, rather than this configuration.
+
+# Purging uses self-alignments without read-depth classification. Review the
+# retained hap FASTAs, especially for hybrid/polyploid assembly objectives.
+# overlap_only is the only implemented mode; old depth-cutoff keys are invalid.
+purge_dups_mode: "overlap_only"
+
+# Mitochondrial replacement thresholds are fractions in [0, 1].
+mito_min_identity: 0.95
+mito_min_query_coverage: 0.80
+mito_min_target_coverage: 0.95
+merqury_k: 21
+
+# Optional reporting and final-assembly QC; disabled by default.
+run_multiqc: false
+run_tidk: false
+run_heterozygosity: false
+run_qc_summary: false
+
+# Optional MGA first phase. The TSV run_mga column takes priority over this
+# default: change N to Y per sample, or omit that column to use this setting.
+# MGA does not enter the hifiasm/LJA refinement or downstream QC branches.
+run_mga: false
+mga_commit: "f0f26da124e5e1362875dbf15c0de1bec2fd34f8"
+mga_mem_mb: 64000
+
+# BUSCO uses automatic eukaryotic lineage selection when busco_lineage is unset.
+# Offline mode requires a populated cache, including placement data for auto mode.
+busco_offline: false
+# busco_download_path: "/absolute/path/to/busco_cache"
+# busco_lineage: "your_lineage_odb12"
+
+# TIDK settings, used only when run_tidk is true.
+tidk_minimum: 5
+tidk_maximum: 30
+tidk_threshold: 20
+tidk_distance: 0.05
+tidk_top_n: 10
+tidk_copies: 5
+tidk_end_size: 10000
+tidk_window: 10000
+tidk_min_sequence_length: 0
+
+# Heterozygosity assumes diploid genotypes; it does not confirm cellular ploidy.
+# Low-callability threshold is a review flag, not an automatic assembly rejection.
+heterozygosity_min_callable_fraction: 0.5
+heterozygosity_exclude_contigs: {}
+# Additional exclusions use exact IDs under sample -> assembler -> list:
+# heterozygosity_exclude_contigs:
+#   SAMPLE_A:
+#     hifiasm: [SAMPLE_A_scaff17]
+#     lja: [SAMPLE_A_scaff23]
+
+# Source revisions used in the validated workflow runs.
+genomescope2:
+  repo: "https://github.com/tbenavi1/genomescope2.0.git"
+  commit: "8f25e3a25eaa691cdae474daf5cfe5416bfc60dc"
+nquire:
+  repo: "https://github.com/clwgg/nQuire"
+  commit: "a990a88ef14b38f257f1a0d368ba8be1bd3d7e4b"

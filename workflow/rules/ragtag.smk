@@ -142,7 +142,8 @@ rule ragtag_purged:
             while IFS= read -r seqid; do
                 [[ -n "$seqid" ]] || continue
                 if ! samtools faidx "$fasta" "$seqid" >> "$out_sorted" 2>> "{log.err}"; then
-                    echo "[WARN] Could not extract sequence '$seqid'; skipping" >> "{log.out}"
+                    echo "[ERROR] Could not extract sequence '$seqid'; aborting to preserve all scaffolds" >> "{log.err}"
+                    return 1
                 fi
             done < "$filtered_order"
 
@@ -194,7 +195,7 @@ rule ragtag_purged:
         echo "[INFO] Reference sequence count: $REF_NSEQ" > "{log.out}"
 
         echo "[INFO] RagTag scaffolding of purged hifiasm" >> "{log.out}"
-        ragtag.py scaffold -t {threads} -o "$PURGED_DIR" "{input.ref}" "{input.purge}" >> "{log.out}" 2>> "{log.err}"
+        ragtag.py scaffold -w -t {threads} -o "$PURGED_DIR" "{input.ref}" "{input.purge}" >> "{log.out}" 2>> "{log.err}"
 
         require_nonempty "{output.fasta}" "purged ragtag scaffold fasta"
         samtools faidx "{output.fasta}" >> "{log.out}" 2>> "{log.err}"
@@ -214,12 +215,19 @@ rule ragtag_purged:
         samtools faidx "{output.compat}" >> "{log.out}" 2>> "{log.err}"
         require_nonempty "{output.ordered_fai}" "purged ordered fasta fai"
         require_nonempty "{output.compat_fai}" "purged compat fasta fai"
+        # Reordering must retain every scaffold ID and sequence length.
+        if ! cmp -s <(cut -f1,2 "{output.fai}" | LC_ALL=C sort) \
+                    <(cut -f1,2 "{output.ordered_fai}" | LC_ALL=C sort); then
+            echo "[ERROR] Reordered scaffolds differ in IDs or lengths from RagTag output" >> "{log.err}"
+            exit 1
+        fi
 
         cp -f "{input.hap}" "{output.final_hap}"
         samtools faidx "{output.final_hap}" >> "{log.out}" 2>> "{log.err}"
         require_nonempty "{output.final_hap}" "final hap fasta"
         require_nonempty "{output.final_hap_fai}" "final hap fasta fai"
-        awk '/^>/{{gsub(/^>/,"",$1); print $1 "\t" "{wildcards.sample}_hap"}}' "{input.hap}" > "{output.final_hap_map}"
+        # Haplotig FASTA is copied unchanged, so its map must retain its real IDs.
+        awk '/^>/{{gsub(/^>/,"",$1); print $1 "\t" $1}}' "{input.hap}" > "{output.final_hap_map}"
 
         rename_fasta_to_sample_scaffs "{output.ordered}" "{output.final_purged}" "{output.final_purged_map}" "{wildcards.sample}"
         require_nonempty "{output.final_purged}" "final purged fasta"
@@ -348,7 +356,8 @@ rule ragtag_purged_lja:
             while IFS= read -r seqid; do
                 [[ -n "$seqid" ]] || continue
                 if ! samtools faidx "$fasta" "$seqid" >> "$out_sorted" 2>> "{log.err}"; then
-                    echo "[WARN] Could not extract sequence '$seqid'; skipping" >> "{log.out}"
+                    echo "[ERROR] Could not extract sequence '$seqid'; aborting to preserve all scaffolds" >> "{log.err}"
+                    return 1
                 fi
             done < "$filtered_order"
 
@@ -400,7 +409,7 @@ rule ragtag_purged_lja:
         echo "[INFO] Reference sequence count: $REF_NSEQ" > "{log.out}"
 
         echo "[INFO] RagTag scaffolding of purged lja" >> "{log.out}"
-        ragtag.py scaffold -t {threads} -o "$PURGED_DIR" "{input.ref}" "{input.purge}" >> "{log.out}" 2>> "{log.err}"
+        ragtag.py scaffold -w -t {threads} -o "$PURGED_DIR" "{input.ref}" "{input.purge}" >> "{log.out}" 2>> "{log.err}"
 
         require_nonempty "{output.fasta}" "purged ragtag scaffold fasta"
         samtools faidx "{output.fasta}" >> "{log.out}" 2>> "{log.err}"
@@ -420,12 +429,19 @@ rule ragtag_purged_lja:
         samtools faidx "{output.compat}" >> "{log.out}" 2>> "{log.err}"
         require_nonempty "{output.ordered_fai}" "purged ordered fasta fai"
         require_nonempty "{output.compat_fai}" "purged compat fasta fai"
+        # Reordering must retain every scaffold ID and sequence length.
+        if ! cmp -s <(cut -f1,2 "{output.fai}" | LC_ALL=C sort) \
+                    <(cut -f1,2 "{output.ordered_fai}" | LC_ALL=C sort); then
+            echo "[ERROR] Reordered scaffolds differ in IDs or lengths from RagTag output" >> "{log.err}"
+            exit 1
+        fi
 
         cp -f "{input.hap}" "{output.final_hap}"
         samtools faidx "{output.final_hap}" >> "{log.out}" 2>> "{log.err}"
         require_nonempty "{output.final_hap}" "final hap fasta"
         require_nonempty "{output.final_hap_fai}" "final hap fasta fai"
-        awk '/^>/{{gsub(/^>/,"",$1); print $1 "\t" "{wildcards.sample}_hap"}}' "{input.hap}" > "{output.final_hap_map}"
+        # Haplotig FASTA is copied unchanged, so its map must retain its real IDs.
+        awk '/^>/{{gsub(/^>/,"",$1); print $1 "\t" $1}}' "{input.hap}" > "{output.final_hap_map}"
 
         rename_fasta_to_sample_scaffs "{output.ordered}" "{output.final_purged}" "{output.final_purged_map}" "{wildcards.sample}"
         require_nonempty "{output.final_purged}" "final purged fasta"

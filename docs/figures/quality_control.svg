@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1600" viewBox="0 0 2200 1600" role="img" aria-labelledby="figure-title figure-description">
+<title id="figure-title">HiFi assembly workflow: quality-control evidence</title>
+<desc id="figure-description">Connected quality-control schematic for the selected hifiasm and LJA branches. HiFi reads feed NanoPlot and TeloSearchLR; pooled HiFi and both Illumina mates feed KMC and exploratory GenomeScope2 fits. Raw and final core assemblies feed BUSCO, reference-free QUAST, Illumina-k-mer Merqury, and reference-based Chromeister. Additional haplotig Chromeister comparisons are manual targets. Final assemblies and Illumina reads produce matching BAMs; nQuire selects one preferred final BAM per sample. Optional TIDK and depth-callable diploid-model heterozygosity have separate inputs and outputs. Heterozygosity also uses OATK mito FASTA for sequence-verified mitochondrial exclusion. Barrnap is restricted to pre-mito hifiasm. Aggregate QC has defined metric sources; MultiQC is an independent dashboard of supported native reports. MGA is outside these core QC branches.</desc>
+<defs>
+<marker id="arrow-paper" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#FFFFFF"/></marker>
+<marker id="arrow-ink" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#192A35"/></marker>
+<marker id="arrow-muted" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#5C6870"/></marker>
+<marker id="arrow-line" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#A7ADAE"/></marker>
+<marker id="arrow-input" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#2B9FF3"/></marker>
+<marker id="arrow-hif" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#67BA48"/></marker>
+<marker id="arrow-lja" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#F1A43D"/></marker>
+<marker id="arrow-mga" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#A365D3"/></marker>
+<marker id="arrow-mito" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#17ABA5"/></marker>
+<marker id="arrow-qc" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#9DD6AB"/></marker>
+<marker id="arrow-bypass" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="17" markerHeight="17" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M 1 1 L 12 7 L 1 13 Z" fill="#EC6869"/></marker>
+</defs>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<rect x="0" y="0" width="2200" height="1600" rx="0" fill="#FFFFFF"/>
+<text x="70" y="62" font-size="16" fill="#2B9FF3" text-anchor="start" font-weight="700">QUALITY CONTROL</text>
+<text x="70" y="112" font-size="42" fill="#192A35" text-anchor="start" font-weight="700">Follow the evidence</text>
+<text x="70" y="148" font-size="22" fill="#5C6870" text-anchor="start">Exact inputs, explicit assembly stages and independent complementary analyses.</text>
+<rect x="400" y="175" width="1255" height="365" rx="22" fill="#f5fbfe" stroke="#a0d4fa" stroke-width="1.6" stroke-dasharray="8 6"/>
+<text x="420" y="204" font-size="19" fill="#5C6870" text-anchor="start" font-weight="700">Read profiles and exploratory models</text>
+<rect x="400" y="560" width="1255" height="355" rx="22" fill="#fbfdfb" stroke="#d3edd9" stroke-width="1.6" stroke-dasharray="8 6"/>
+<text x="420" y="589" font-size="19" fill="#5C6870" text-anchor="start" font-weight="700">Each selected hifiasm / LJA assembly · raw and final</text>
+<rect x="400" y="925" width="1255" height="485" rx="22" fill="#fbfdfb" stroke="#d3edd9" stroke-width="1.6" stroke-dasharray="8 6"/>
+<text x="420" y="954" font-size="19" fill="#5C6870" text-anchor="start" font-weight="700">Final-assembly and alignment evidence</text>
+<rect x="1720" y="175" width="420" height="720" rx="22" fill="#fbf8fd" stroke="#d6baeb" stroke-width="1.6" stroke-dasharray="8 6"/>
+<text x="1740" y="204" font-size="19" fill="#5C6870" text-anchor="start" font-weight="700">Optional report summaries</text>
+<rect x="1720" y="925" width="420" height="485" rx="22" fill="#f5fbfb" stroke="#97d9d6" stroke-width="1.6" stroke-dasharray="8 6"/>
+<text x="1740" y="954" font-size="19" fill="#5C6870" text-anchor="start" font-weight="700">Stage-specific annotation</text>
+<path d="M 315 280 L 357.5 280 Q 370 280 370 267.5 L 370 267.5 Q 370 255 382.5 255 L 480 255" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 315 280 L 357.5 280 Q 370 280 370 267.5 L 370 267.5 Q 370 255 382.5 255 L 480 255" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 370 280 L 370 312 Q 370 325 383 325 L 887 325 Q 900 325 900 312 L 900 290" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 370 280 L 370 312 Q 370 325 383 325 L 887 325 Q 900 325 900 312 L 900 290" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 350 280 L 350 337 Q 350 350 363 350 L 427 350 Q 440 350 440 363 L 440 397 Q 440 410 453 410 L 480 410" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 350 280 L 350 337 Q 350 350 363 350 L 427 350 Q 440 350 440 363 L 440 397 Q 440 410 453 410 L 480 410" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 315 460 L 427 460 Q 440 460 440 447 L 440 410" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 315 460 L 427 460 Q 440 460 440 447 L 440 410" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 710 410 L 785 410" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 710 410 L 785 410" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 315 460 L 327.5 460 Q 340 460 340 472.5 L 340 497 Q 340 510 353 510 L 1022 510 Q 1035 510 1035 497 L 1035 463 Q 1035 450 1048 450 L 1090 450" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 315 460 L 327.5 460 Q 340 460 340 472.5 L 340 497 Q 340 510 353 510 L 1022 510 Q 1035 510 1035 497 L 1035 463 Q 1035 450 1048 450 L 1090 450" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1205 485 L 1205 605" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1205 485 L 1205 605" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1205 685 L 1205 730" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1205 685 L 1205 730" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<ellipse cx="180" cy="280" rx="135" ry="49" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="180" y="274.64" font-size="21" fill="#192A35" text-anchor="middle">PacBio HiFi</text>
+<text x="180" y="299.64" font-size="21" fill="#192A35" text-anchor="middle">reads</text>
+<ellipse cx="180" cy="460" rx="135" ry="49" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="180" y="454.64" font-size="21" fill="#192A35" text-anchor="middle">Illumina</text>
+<text x="180" y="479.64" font-size="21" fill="#192A35" text-anchor="middle">R1 + R2</text>
+<rect x="480" y="220" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="595.0" y="249.795" font-size="25" fill="#192A35" text-anchor="middle">NanoPlot</text>
+<text x="595.0" y="275.79499999999996" font-size="17" fill="#5C6870" text-anchor="middle">Read length / yield</text>
+<rect x="785" y="220" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="900.0" y="249.655" font-size="24" fill="#192A35" text-anchor="middle">TeloSearchLR</text>
+<text x="900.0" y="275.155" font-size="17" fill="#5C6870" text-anchor="middle">Read-repeat discovery</text>
+<rect x="480" y="375" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="595.0" y="404.795" font-size="25" fill="#192A35" text-anchor="middle">KMC</text>
+<text x="595.0" y="430.795" font-size="17" fill="#5C6870" text-anchor="middle">Pooled read k-mers</text>
+<rect x="785" y="375" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="900.0" y="404.655" font-size="24" fill="#192A35" text-anchor="middle">GenomeScope2</text>
+<text x="900.0" y="430.155" font-size="17" fill="#5C6870" text-anchor="middle">Exploratory fits</text>
+<rect x="1090" y="415" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1205.0" y="444.795" font-size="25" fill="#192A35" text-anchor="middle">meryl</text>
+<text x="1205.0" y="470.795" font-size="17" fill="#5C6870" text-anchor="middle">Illumina only</text>
+<rect x="423.6" y="469" width="292.8" height="26" rx="3" fill="#FFFFFF"/>
+<text x="570" y="487" font-size="18" fill="#5C6870" text-anchor="middle">HiFi + both Illumina mates</text>
+<path d="M 315 755 L 357 755 Q 370 755 370 768 L 370 857 Q 370 870 383 870 L 1495 870" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 315 755 L 357 755 Q 370 755 370 768 L 370 857 Q 370 870 383 870 L 1495 870" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 595 870 L 595 805" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 595 870 L 595 805" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 900 870 L 900 805" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 900 870 L 900 805" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 1205 870 L 1205 805" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1205 870 L 1205 805" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 1495 870 L 1495 805" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1495 870 L 1495 805" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 595 685 L 595 730" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 595 685 L 595 730" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 1495 685 L 1495 730" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1495 685 L 1495 730" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<ellipse cx="180" cy="755" rx="135" ry="59" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="180" y="737.8" font-size="20" fill="#192A35" text-anchor="middle">Raw + final</text>
+<text x="180" y="761.8" font-size="20" fill="#192A35" text-anchor="middle">FASTA</text>
+<text x="180" y="785.8" font-size="20" fill="#192A35" text-anchor="middle">hifiasm / LJA</text>
+<ellipse cx="595" cy="645" rx="130" ry="40" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="595" y="639.96" font-size="19" fill="#192A35" text-anchor="middle">BUSCO</text>
+<text x="595" y="662.96" font-size="19" fill="#192A35" text-anchor="middle">lineage DB</text>
+<ellipse cx="1205" cy="645" rx="140" ry="40" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1205" y="639.96" font-size="19" fill="#192A35" text-anchor="middle">Illumina</text>
+<text x="1205" y="662.96" font-size="19" fill="#192A35" text-anchor="middle">read k-mers</text>
+<ellipse cx="1495" cy="645" rx="130" ry="40" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1495" y="639.96" font-size="19" fill="#192A35" text-anchor="middle">External</text>
+<text x="1495" y="662.96" font-size="19" fill="#192A35" text-anchor="middle">reference</text>
+<rect x="480" y="730" width="230" height="75" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="595.0" y="762.295" font-size="25" fill="#192A35" text-anchor="middle">BUSCO</text>
+<text x="595.0" y="788.295" font-size="17" fill="#5C6870" text-anchor="middle">Gene completeness</text>
+<rect x="785" y="730" width="230" height="75" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="900.0" y="762.295" font-size="25" fill="#192A35" text-anchor="middle">QUAST</text>
+<text x="900.0" y="788.295" font-size="17" fill="#5C6870" text-anchor="middle">Assembly statistics</text>
+<rect x="1090" y="730" width="230" height="75" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1205.0" y="762.295" font-size="25" fill="#192A35" text-anchor="middle">Merqury</text>
+<text x="1205.0" y="788.295" font-size="17" fill="#5C6870" text-anchor="middle">QV + completeness</text>
+<rect x="1380" y="730" width="230" height="75" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1495.0" y="762.155" font-size="24" fill="#192A35" text-anchor="middle">Chromeister</text>
+<text x="1495.0" y="787.655" font-size="17" fill="#5C6870" text-anchor="middle">Reference dotplots</text>
+<rect x="786.9" y="825" width="226.2" height="25" rx="3" fill="#FFFFFF"/>
+<text x="900" y="842" font-size="17" fill="#5C6870" text-anchor="middle">No external reference</text>
+<rect x="764.6" y="880" width="490.8" height="27" rx="3" fill="#FFFFFF"/>
+<text x="1010" y="899" font-size="19" fill="#5C6870" text-anchor="middle">Keep sample × assembler × stage identities</text>
+<rect x="1383.4" y="883" width="223.2" height="24" rx="3" fill="#FFFFFF"/>
+<text x="1495" y="899" font-size="16" fill="#5C6870" text-anchor="middle">Haplotig plots: manual</text>
+<path d="M 315 1070 L 480 1070" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 315 1070 L 480 1070" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 315 1205 L 327.5 1205 Q 340 1205 340 1192.5 L 340 1158 Q 340 1145 353 1145 L 582 1145 Q 595 1145 595 1132 L 595 1105" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 315 1205 L 327.5 1205 Q 340 1205 340 1192.5 L 340 1158 Q 340 1145 353 1145 L 582 1145 Q 595 1145 595 1132 L 595 1105" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<path d="M 710 1070 L 775 1070" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 710 1070 L 775 1070" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 1005 1070 L 1027 1070 Q 1040 1070 1040 1057 L 1040 1013 Q 1040 1000 1053 1000 L 1090 1000" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1005 1070 L 1027 1070 Q 1040 1070 1040 1057 L 1040 1013 Q 1040 1000 1053 1000 L 1090 1000" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-hif)"/>
+<path d="M 1005 1070 L 1027 1070 Q 1040 1070 1040 1083 L 1040 1157 Q 1040 1170 1053 1170 L 1090 1170" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1005 1070 L 1027 1070 Q 1040 1070 1040 1083 L 1040 1157 Q 1040 1170 1053 1170 L 1090 1170" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-mga)"/>
+<path d="M 350 1070 L 360 1070 Q 370 1070 370 1080 L 370 1337 Q 370 1350 383 1350 L 1227 1350 Q 1240 1350 1240 1337 L 1240 1215" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 350 1070 L 360 1070 Q 370 1070 370 1080 L 370 1337 Q 370 1350 383 1350 L 1227 1350 Q 1240 1350 1240 1337 L 1240 1215" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-mga)"/>
+<path d="M 370 1070 L 370 1257 Q 370 1270 383 1270 L 480 1270" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 370 1070 L 370 1257 Q 370 1270 383 1270 L 480 1270" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-mga)"/>
+<path d="M 1515 1230 L 1515 1183 Q 1515 1170 1502 1170 L 1390 1170" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1515 1230 L 1515 1183 Q 1515 1170 1502 1170 L 1390 1170" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-input)"/>
+<ellipse cx="180" cy="1070" rx="135" ry="50" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="180" y="1064.8" font-size="20" fill="#192A35" text-anchor="middle">Final FASTA</text>
+<text x="180" y="1088.8" font-size="20" fill="#192A35" text-anchor="middle">hifiasm / LJA</text>
+<ellipse cx="180" cy="1205" rx="135" ry="43" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="180" y="1199.8" font-size="20" fill="#192A35" text-anchor="middle">Illumina</text>
+<text x="180" y="1223.8" font-size="20" fill="#192A35" text-anchor="middle">R1 + R2</text>
+<rect x="480" y="1035" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="595.0" y="1064.515" font-size="23" fill="#192A35" text-anchor="middle">BWA / SAMtools</text>
+<text x="595.0" y="1089.515" font-size="17" fill="#5C6870" text-anchor="middle">Map to each final FASTA</text>
+<ellipse cx="890" cy="1070" rx="115" ry="47" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="890" y="1064.8" font-size="20" fill="#192A35" text-anchor="middle">Matching</text>
+<text x="890" y="1088.8" font-size="20" fill="#192A35" text-anchor="middle">final BAM</text>
+<rect x="1090" y="965" width="300" height="70" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1240.0" y="994.795" font-size="25" fill="#192A35" text-anchor="middle">nQuire</text>
+<text x="1240.0" y="1020.795" font-size="17" fill="#5C6870" text-anchor="middle">One preferred BAM / sample</text>
+<rect x="1060.6" y="1045" width="358.8" height="25" rx="3" fill="#FFFFFF"/>
+<text x="1240" y="1062" font-size="17" fill="#5C6870" text-anchor="middle">hifiasm if selected; otherwise LJA</text>
+<rect x="1090" y="1125" width="300" height="90" rx="17" fill="#FFFFFF" stroke="#A365D3" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="1240.0" y="1164.795" font-size="25" fill="#192A35" text-anchor="middle">Heterozygosity</text>
+<text x="1240.0" y="1190.795" font-size="17" fill="#5C6870" text-anchor="middle">Depth-callable diploid model</text>
+<rect x="480" y="1235" width="230" height="70" rx="17" fill="#FFFFFF" stroke="#A365D3" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="595.0" y="1264.795" font-size="25" fill="#192A35" text-anchor="middle">TIDK</text>
+<text x="595.0" y="1290.795" font-size="17" fill="#5C6870" text-anchor="middle">Exact repeats at ends</text>
+<ellipse cx="1515" cy="1275" rx="115" ry="45" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1515" y="1269.96" font-size="19" fill="#192A35" text-anchor="middle">OATK mito</text>
+<text x="1515" y="1292.96" font-size="19" fill="#192A35" text-anchor="middle">FASTA</text>
+<text x="1515" y="1350" font-size="16" fill="#5C6870" text-anchor="middle">Verify mito exclusion</text>
+<text x="760" y="1278" font-size="19" fill="#5C6870" text-anchor="start">Candidate arrays / end coordinates</text>
+<rect x="851.2" y="1358" width="357.6" height="26" rx="3" fill="#FFFFFF"/>
+<text x="1030" y="1376" font-size="18" fill="#5C6870" text-anchor="middle">Exact final FASTA + matching BAM</text>
+<text x="890" y="1128" font-size="17" fill="#5C6870" text-anchor="middle">Proper-pairing evidence</text>
+<path d="M 1930 320 L 1930 355" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1930 320 L 1930 355" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-mga)"/>
+<path d="M 1930 667 L 1930 720" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1930 667 L 1930 720" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7" marker-end="url(#arrow-mga)"/>
+<ellipse cx="1930" cy="270" rx="180" ry="50" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1930" y="264.64" font-size="21" fill="#192A35" text-anchor="middle">Supported native</text>
+<text x="1930" y="289.64" font-size="21" fill="#192A35" text-anchor="middle">QC reports</text>
+<rect x="1790" y="355" width="280" height="80" rx="17" fill="#FFFFFF" stroke="#A365D3" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="1930.0" y="389.795" font-size="25" fill="#192A35" text-anchor="middle">MultiQC</text>
+<text x="1930.0" y="415.795" font-size="17" fill="#5C6870" text-anchor="middle">Independent HTML dashboard</text>
+<text x="1930" y="478" font-size="18" fill="#5C6870" text-anchor="middle">Supported modules only</text>
+<ellipse cx="1930" cy="600" rx="190" ry="67" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1930" y="584.12" font-size="18" fill="#192A35" text-anchor="middle">FASTA · BUSCO · Merqury</text>
+<text x="1930" y="606.12" font-size="18" fill="#192A35" text-anchor="middle">final mapping</text>
+<text x="1930" y="628.12" font-size="18" fill="#192A35" text-anchor="middle">± enabled TIDK / heterozygosity</text>
+<rect x="1790" y="720" width="280" height="80" rx="17" fill="#FFFFFF" stroke="#A365D3" stroke-width="3" stroke-dasharray="8 6"/>
+<text x="1930.0" y="754.795" font-size="25" fill="#192A35" text-anchor="middle">Aggregate QC</text>
+<text x="1930.0" y="780.795" font-size="17" fill="#5C6870" text-anchor="middle">TSV · figures · provenance</text>
+<text x="1930" y="842" font-size="18" fill="#5C6870" text-anchor="middle">sample × assembler × stage</text>
+<path d="M 1930 1135 L 1930 1205" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1930 1135 L 1930 1205" fill="none" stroke="#17ABA5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-mito)"/>
+<ellipse cx="1930" cy="1080" rx="180" ry="55" fill="white" stroke="#2B9FF3" stroke-width="3.5"/>
+<text x="1930" y="1074.8" font-size="20" fill="#192A35" text-anchor="middle">Pre-mito hifiasm</text>
+<text x="1930" y="1098.8" font-size="20" fill="#192A35" text-anchor="middle">purged / RagTag stage</text>
+<rect x="1790" y="1205" width="280" height="80" rx="17" fill="#FFFFFF" stroke="#A7ADAE" stroke-width="3"/>
+<text x="1930.0" y="1239.795" font-size="25" fill="#192A35" text-anchor="middle">Barrnap</text>
+<text x="1930.0" y="1265.795" font-size="17" fill="#5C6870" text-anchor="middle">rRNA GFF3</text>
+<text x="1930" y="1332" font-size="19" fill="#5C6870" text-anchor="middle">hifiasm branch only</text>
+<path d="M 70 1470 L 136 1470" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 70 1470 L 136 1470" fill="none" stroke="#2B9FF3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="153" y="1477" font-size="20" fill="#192A35" text-anchor="start">Input / reference</text>
+<path d="M 590 1470 L 656 1470" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 590 1470 L 656 1470" fill="none" stroke="#67BA48" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="673" y="1477" font-size="20" fill="#192A35" text-anchor="start">Core QC / mapping</text>
+<path d="M 1110 1470 L 1176 1470" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1110 1470 L 1176 1470" fill="none" stroke="#A365D3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7"/>
+<text x="1193" y="1477" font-size="20" fill="#192A35" text-anchor="start">Optional module / summary</text>
+<path d="M 1715 1470 L 1781 1470" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1715 1470 L 1781 1470" fill="none" stroke="#17ABA5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1798" y="1477" font-size="20" fill="#192A35" text-anchor="start">Stage-specific annotation</text>
+<text x="1100" y="1530" font-size="20" fill="#5C6870" text-anchor="middle">Model fits do not establish ploidy; repeat candidates do not establish T2T.</text>
+<text x="1100" y="1565" font-size="20" fill="#5C6870" text-anchor="middle">MGA remains a separate first-phase candidate outside these hifiasm / LJA QC branches.</text>
+</g>
+</svg>

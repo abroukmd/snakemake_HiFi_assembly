@@ -1,0 +1,13 @@
+name: hifi-assembly
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  # Match the Python/Snakemake/pandas versions used for workflow validation.
+  # Rule-specific bioinformatics tools are provisioned separately by --use-conda.
+  - python=3.12.3
+  - snakemake-minimal=9.5.1
+  - pandas=2.2.3
+  # Snakemake invokes Conda to create and activate rule environments.
+  - conda=25.7.0

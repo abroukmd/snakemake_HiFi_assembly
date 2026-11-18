@@ -3,118 +3,64 @@ include: "../accessors.smk"
 rule integrate_mito_hifiasm:
     input:
         assembly = get_purged_hifiasm_or_original,
-        mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta")
+        mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
+        helper = workflow.source_path("../scripts/integrate_mito.py")
     output:
-        final = outpath("{sample}_FINAL_ASSEMBLIES/hifiasm/{sample}.purged.final.fasta")
+        final = outpath("{sample}_FINAL_ASSEMBLIES/hifiasm/{sample}.purged.final.fasta"),
+        paf = outpath("Assemblies/{sample}/OATK/mito_integration/hifiasm/mito_vs_assembly.paf"),
+        removed = outpath("Assemblies/{sample}/OATK/mito_integration/hifiasm/contigs_to_remove.txt"),
+        report = outpath("Assemblies/{sample}/OATK/mito_integration/hifiasm/integration.tsv")
     params:
-        workdir = outpath("Assemblies/{sample}/OATK/mito_integration/hifiasm"),
-        min_identity = 0.95,
-        min_qcov = 0.80
+        min_identity = config.get("mito_min_identity", 0.95),
+        min_qcov = config.get("mito_min_query_coverage", 0.80),
+        min_tcov = config.get("mito_min_target_coverage", 0.95)
+    log:
+        outpath("Assemblies/{sample}/OATK/mito_integration/hifiasm/integration.log")
     threads: 4
     conda:
         "../envs/ragtag.yaml"
     shell:
         r"""
         set -euo pipefail
-        mkdir -p {params.workdir}
-        mkdir -p $(dirname {output.final})
-
-        minimap2 -x asm5 -t {threads} {input.assembly} {input.mito} > {params.workdir}/mito_vs_assembly.paf
-
-        awk -v min_ident={params.min_identity} -v min_qcov={params.min_qcov} 'BEGIN{{OFS="\t"}} {{
-            qname=$1; qlen=$2; qstart=$3; qend=$4;
-            matches=$10; alnlen=$11;
-            if (alnlen > 0 && qlen > 0) {{
-                identity=matches/alnlen;
-                qcov=(qend-qstart)/qlen;
-                if (identity >= min_ident && qcov >= min_qcov) print qname;
-            }}
-        }}' {params.workdir}/mito_vs_assembly.paf | sort -u > {params.workdir}/contigs_to_remove.txt
-
-        awk 'BEGIN {{
-                 while ((getline line < "{params.workdir}/contigs_to_remove.txt") > 0) {{
-                     remove[line]=1
-                 }}
-                 close("{params.workdir}/contigs_to_remove.txt")
-                 keep=1
-             }}
-             /^>/ {{
-                 header=$0
-                 name=substr($1,2)
-                 sub(/[[:space:]].*$/, "", name)
-                 keep = !(name in remove)
-             }}
-             keep {{ print }}' {input.assembly} > {params.workdir}/filtered.fa
-
-        awk 'BEGIN{{printed=0}}
-             /^>/ {{
-                 if (!printed) {{
-                     print ">{wildcards.sample}_mito"
-                     printed=1
-                     next
-                 }}
-             }}
-             {{ print }}' {input.mito} > {params.workdir}/mito_renamed.fa
-
-        cat {params.workdir}/filtered.fa {params.workdir}/mito_renamed.fa > {output.final}
+        mkdir -p "$(dirname {output.paf:q})" "$(dirname {output.final:q})"
+        minimap2 -x asm5 -t {threads} {input.assembly:q} {input.mito:q} > {output.paf:q} 2> {log:q}
+        python {input.helper:q} --assembly {input.assembly:q} --mito {input.mito:q} \
+            --paf {output.paf:q} --sample {wildcards.sample:q} --output {output.final:q} \
+            --removed {output.removed:q} --report {output.report:q} \
+            --min-identity {params.min_identity} --min-query-coverage {params.min_qcov} \
+            --min-target-coverage {params.min_tcov} >> {log:q} 2>&1
+        test -s {output.final:q}
         """
 
 
 rule integrate_mito_lja:
     input:
         assembly = get_purged_lja_or_original,
-        mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta")
+        mito = outpath("Assemblies/{sample}/OATK/{sample}.mito.ctg.fasta"),
+        helper = workflow.source_path("../scripts/integrate_mito.py")
     output:
-        final = outpath("{sample}_FINAL_ASSEMBLIES/lja/{sample}.purged.final.fasta")
+        final = outpath("{sample}_FINAL_ASSEMBLIES/lja/{sample}.purged.final.fasta"),
+        paf = outpath("Assemblies/{sample}/OATK/mito_integration/lja/mito_vs_assembly.paf"),
+        removed = outpath("Assemblies/{sample}/OATK/mito_integration/lja/contigs_to_remove.txt"),
+        report = outpath("Assemblies/{sample}/OATK/mito_integration/lja/integration.tsv")
     params:
-        workdir = outpath("Assemblies/{sample}/OATK/mito_integration/lja"),
-        min_identity = 0.95,
-        min_qcov = 0.80
+        min_identity = config.get("mito_min_identity", 0.95),
+        min_qcov = config.get("mito_min_query_coverage", 0.80),
+        min_tcov = config.get("mito_min_target_coverage", 0.95)
+    log:
+        outpath("Assemblies/{sample}/OATK/mito_integration/lja/integration.log")
     threads: 4
     conda:
         "../envs/ragtag.yaml"
     shell:
         r"""
         set -euo pipefail
-        mkdir -p {params.workdir}
-        mkdir -p $(dirname {output.final})
-
-        minimap2 -x asm5 -t {threads} {input.assembly} {input.mito} > {params.workdir}/mito_vs_assembly.paf
-
-        awk -v min_ident={params.min_identity} -v min_qcov={params.min_qcov} 'BEGIN{{OFS="\t"}} {{
-            qname=$1; qlen=$2; qstart=$3; qend=$4;
-            matches=$10; alnlen=$11;
-            if (alnlen > 0 && qlen > 0) {{
-                identity=matches/alnlen;
-                qcov=(qend-qstart)/qlen;
-                if (identity >= min_ident && qcov >= min_qcov) print qname;
-            }}
-        }}' {params.workdir}/mito_vs_assembly.paf | sort -u > {params.workdir}/contigs_to_remove.txt
-
-        awk 'BEGIN {{
-                 while ((getline line < "{params.workdir}/contigs_to_remove.txt") > 0) {{
-                     remove[line]=1
-                 }}
-                 close("{params.workdir}/contigs_to_remove.txt")
-                 keep=1
-             }}
-             /^>/ {{
-                 header=$0
-                 name=substr($1,2)
-                 sub(/[[:space:]].*$/, "", name)
-                 keep = !(name in remove)
-             }}
-             keep {{ print }}' {input.assembly} > {params.workdir}/filtered.fa
-
-        awk 'BEGIN{{printed=0}}
-             /^>/ {{
-                 if (!printed) {{
-                     print ">{wildcards.sample}_mito"
-                     printed=1
-                     next
-                 }}
-             }}
-             {{ print }}' {input.mito} > {params.workdir}/mito_renamed.fa
-
-        cat {params.workdir}/filtered.fa {params.workdir}/mito_renamed.fa > {output.final}
+        mkdir -p "$(dirname {output.paf:q})" "$(dirname {output.final:q})"
+        minimap2 -x asm5 -t {threads} {input.assembly:q} {input.mito:q} > {output.paf:q} 2> {log:q}
+        python {input.helper:q} --assembly {input.assembly:q} --mito {input.mito:q} \
+            --paf {output.paf:q} --sample {wildcards.sample:q} --output {output.final:q} \
+            --removed {output.removed:q} --report {output.report:q} \
+            --min-identity {params.min_identity} --min-query-coverage {params.min_qcov} \
+            --min-target-coverage {params.min_tcov} >> {log:q} 2>&1
+        test -s {output.final:q}
         """

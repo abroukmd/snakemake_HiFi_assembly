@@ -8,6 +8,27 @@ import os
 def normalize_sample(wc):
     return wc.sample
 
+
+def enabled_assemblers(wc):
+    s = normalize_sample(wc)
+    return [asm for asm, selected in (("hifiasm", HIFIASM_SAMPLES), ("lja", LJA_SAMPLES)) if s in selected]
+
+
+def get_enabled_raw_assemblies(wc):
+    getters = {"hifiasm": get_asm_hifiasm_abs, "lja": get_asm_lja_abs}
+    return [getters[asm](wc) for asm in enabled_assemblers(wc)]
+
+
+def get_enabled_final_assemblies(wc):
+    getters = {"hifiasm": get_final_hifiasm_abs, "lja": get_final_lja_abs}
+    return [getters[asm](wc) for asm in enabled_assemblers(wc)]
+
+
+def get_nquire_bam(wc):
+    # Prefer the existing hifiasm convention, with LJA for LJA-only samples.
+    asm = enabled_assemblers(wc)[0]
+    return outpath(f"Assemblies/{wc.sample}/QC/Mapping/purged-{asm}.bam")
+
 # FASTQs from config
 
 def get_fq1_abs(wc):
@@ -28,6 +49,10 @@ def get_asm_hifiasm_abs(wc):
 def get_asm_lja_abs(wc):
     s = normalize_sample(wc)
     return outpath(f"Assemblies/{s}/LJA/assembly.fasta")
+
+
+def get_asm_mga_abs(wc):
+    return outpath(f"Assemblies/{normalize_sample(wc)}/MGA/assembly.fasta")
 
 
 # Purged assemblies before mito integration

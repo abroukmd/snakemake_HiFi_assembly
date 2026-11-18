@@ -9,8 +9,10 @@ dependencies:
   - gcc
   - kmc
   - r-base
-  - r-minpack.lm 
+  - r-minpack.lm
   - r-argparse
+  # Required GenomeScope import; install it through Conda, without CRAN Suggests.
+  - r-jsonlite=2.0.0
   - r-optparse
   - r-ggplot2
   - r-dplyr
@@ -18,4 +20,3 @@ dependencies:
   - r-devtools
   - r-remotes
   - pip
-  

@@ -1,4 +1,4 @@
-name: hifiasm_env
+name: barrnap_env
 channels:
   - bioconda
   - conda-forge

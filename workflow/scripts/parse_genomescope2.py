@@ -1,164 +1,81 @@
 #!/usr/bin/env python3
-import re
-import sys
+"""Extract GenomeScope summary fit scores without asserting biological ploidy.
+
+The console field called 'model fit' is adups in GenomeScope 2.0, not a fit
+score. Only summary.txt's explicit Model Fit percentages are used here.
+"""
+import argparse
 import csv
+import math
 from pathlib import Path
-from statistics import median
+import re
 
-# -------------------------------
-# Biological / heuristic filters
-# -------------------------------
-#
-# These are designed to be species-agnostic and work for:
-# - yeasts (~7–15 Mb genomes)
-# - filamentous fungi (~25–35 Mb genomes)
-#
-# Instead of hard-coding absolute genome sizes, we:
-#   1) compute the median genome_len across all models
-#   2) keep only models within a reasonable factor of that median
-#
-# This reflects the GenomeScope2 behavior that the correct models
-# tend to cluster near the true genome size, while artefactual
-# models often give much smaller/larger sizes (e.g. 3–6 Mb or 50+ Mb).
-#
-# We also exclude models with unrealistically high heterozygosity
-# (>20%), which is extremely unlikely for yeasts/fungi and usually
-# indicates the model is explaining repeats/collapsed peaks as het.
-#
-# References:
-# - Ranallo-Benavidez et al. 2020, Nat Commun 11:1432 (GenomeScope2)
-# - Peter et al. 2018, Nature 556:339–344 (S. cerevisiae diversity)
-# - Gladieux et al. 2014, Fungal Genet Biol 66:13–23 (fungal het ranges)
+NUMBER = r"[-+]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?"
+HEADER = re.compile(r"(?:GenomeScope analyzing .*?p=|\[INFO\] GenomeScope: p=)(\d+)\s+k=(\d+).*?outdir=(\S+)")
+FIT = re.compile(rf"^Model Fit\s+({NUMBER})%\s+({NUMBER})%\s*$", re.MULTILINE)
+LENGTH = re.compile(r"^Genome Haploid Length\s+([0-9,]+) bp\s+([0-9,]+) bp", re.MULTILINE)
+FIELDS = ["ploidy", "k", "outdir", "genome_len_min", "genome_len_max",
+          "model_fit_all_percent", "model_fit_full_percent", "source_summary",
+          "source_log", "fit_rank", "best_by_model_fit", "selection_status"]
 
-GENOME_LEN_FACTOR_MIN = 0.6   # keep models with len >= 60% of median
-GENOME_LEN_FACTOR_MAX = 1.6   # and <= 160% of median
-MAX_HET = 0.20                # 20% heterozygosity cap (very generous)
 
-# -------------------------------
-# Regexes for parsing
-# -------------------------------
-
-RE_HEADER = re.compile(r"GenomeScope analyzing .* p=(\d+)\s+k=(\d+)\s+outdir=(\S+)")
-RE_MODEL  = re.compile(
-    r"Model converged\s+het:(?P<het>[0-9.eE+-]+)\s+kcov:(?P<kcov>[0-9.eE+-]+)\s+err:(?P<err>[0-9.eE+-]+)\s+model fit:(?P<fit>[0-9.eE+-]+)\s+len:(?P<len>[0-9.eE+-]+)"
-)
-RE_HET_PCT = re.compile(r"heterozygosity:\s*([0-9.]+)\s*%")
-
-def parse_one(log_path: Path):
-    text = log_path.read_text(errors="replace").splitlines()
+def parse_one(log_path):
+    log_path = Path(log_path).resolve()
     rows = []
-    current = None
-
-    last_het_pct = None
-    for line in text:
-        m = RE_HET_PCT.search(line)
-        if m:
-            last_het_pct = float(m.group(1)) / 100.0
-
-    for line in text:
-        h = RE_HEADER.search(line)
-        if h:
-            current = {
-                "ploidy": int(h.group(1)),
-                "k": int(h.group(2)),
-                "outdir": h.group(3),
-                "het": None,
-                "kcov": None,
-                "err": None,
-                "model_fit": None,
-                "genome_len": None,
-                "source_log": str(log_path),
-            }
+    seen = set()
+    for line in log_path.read_text(errors="replace").splitlines():
+        match = HEADER.search(line)
+        if not match:
             continue
-
-        m = RE_MODEL.search(line)
-        if m and current:
-            current["het"] = float(m.group("het"))
-            current["kcov"] = float(m.group("kcov"))
-            current["err"] = float(m.group("err"))
-            current["model_fit"] = float(m.group("fit"))
-            current["genome_len"] = float(m.group("len"))
-            rows.append(current)
-            current = None
-
-    # If GenomeScope printed only "heterozygosity: X%" without "Model converged het:"
-    # (rare), we still return the percent value as het if needed.
-    for r in rows:
-        if (r["het"] is None) and (last_het_pct is not None):
-            r["het"] = last_het_pct
-
+        ploidy, k, folder = match.groups()
+        directory = Path(folder)
+        if not directory.is_absolute():
+            directory = log_path.parent / directory
+        summary = directory / "summary.txt"
+        if summary in seen or not summary.is_file():
+            continue
+        seen.add(summary)
+        content = summary.read_text(errors="replace")
+        fit, length = FIT.search(content), LENGTH.search(content)
+        if not fit or not length:
+            continue
+        all_fit, full_fit = map(float, fit.groups())
+        lengths = [int(x.replace(",", "")) for x in length.groups()]
+        if not all(math.isfinite(x) and x <= 100 for x in (all_fit, full_fit)) or min(lengths) <= 0:
+            continue
+        rows.append({"ploidy": int(ploidy), "k": int(k), "outdir": str(directory),
+                     "genome_len_min": min(lengths), "genome_len_max": max(lengths),
+                     "model_fit_all_percent": all_fit, "model_fit_full_percent": full_fit,
+                     "source_summary": str(summary), "source_log": str(log_path)})
     return rows
 
+
+def summarize(logs):
+    rows = [row for log in logs for row in parse_one(log)]
+    if not rows:
+        raise ValueError("No converged GenomeScope summary with valid Model Fit and genome length")
+    unique = {row["source_summary"]: row for row in rows}
+    rows = list(unique.values())
+    scores = sorted({row["model_fit_all_percent"] for row in rows}, reverse=True)
+    for row in rows:
+        rank = scores.index(row["model_fit_all_percent"]) + 1
+        row.update(fit_rank=rank, best_by_model_fit="YES" if rank == 1 else "",
+                   selection_status="exploratory_fit_ranking_not_validated_ploidy")
+    return sorted(rows, key=lambda row: (row["ploidy"], row["source_summary"]))
+
+
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: parse_genomescope2.py <out.tsv> <log1> [log2 ...]", file=sys.stderr)
-        sys.exit(2)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", type=Path)
+    parser.add_argument("logs", type=Path, nargs="+")
+    args = parser.parse_args()
+    rows = summarize(args.logs)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with args.output.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(rows)
 
-    out_tsv = Path(sys.argv[1])
-    logs = [Path(p) for p in sys.argv[2:]]
-
-    all_rows = []
-    for lp in logs:
-        all_rows.extend(parse_one(lp))
-
-    # Filter to rows that have model_fit
-    valid = [r for r in all_rows if r.get("model_fit") is not None]
-
-    fields = ["ploidy","k","outdir","het","kcov","err","model_fit","genome_len","source_log","best"]
-    out_tsv.parent.mkdir(parents=True, exist_ok=True)
-
-    if not valid:
-        # Write empty TSV with header so Snakemake still has output
-        with out_tsv.open("w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=fields, delimiter="\t")
-            w.writeheader()
-        sys.exit(0)
-
-    # --------------------------------------
-    # Biological / heuristic filtering
-    # --------------------------------------
-
-    # Use median genome_len as a robust estimate of the "true" genome size
-    # and discard models that are large outliers.
-    genome_lens = [r["genome_len"] for r in valid if r.get("genome_len") is not None]
-    if genome_lens:
-        med_len = median(genome_lens)
-    else:
-        med_len = None
-
-    def is_biologically_plausible(r):
-        g = r.get("genome_len")
-        h = r.get("het")
-        if g is None or h is None:
-            return False
-
-        # Heterozygosity filter: discard models with absurdly high het
-        if h > MAX_HET:
-            return False
-
-        # Genome length filter: relative to median, not absolute size
-        if med_len is not None:
-            if not (GENOME_LEN_FACTOR_MIN * med_len <= g <= GENOME_LEN_FACTOR_MAX * med_len):
-                return False
-
-        return True
-
-    plausible = [r for r in valid if is_biologically_plausible(r)]
-
-    # If we have at least one biologically plausible model, select best among those.
-    # Otherwise, fall back to purely statistical choice (lowest model_fit).
-    candidates = plausible if plausible else valid
-
-    # Choose best = lowest model_fit among candidates
-    best_row = min(candidates, key=lambda r: r["model_fit"])
-
-    with out_tsv.open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=fields, delimiter="\t")
-        w.writeheader()
-        for r in sorted(valid, key=lambda x: x["ploidy"]):
-            r2 = dict(r)
-            r2["best"] = "YES" if (r is best_row) else ""
-            w.writerow(r2)
 
 if __name__ == "__main__":
     main()

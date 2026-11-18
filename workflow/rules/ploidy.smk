@@ -15,6 +15,7 @@ rule genomescope2_ploidy:
         illumina_r2=lambda wc: sample_fq2[wc.sample],
         hifi=lambda wc: sample_paths[wc.sample],
         gs2_install=GS2_DONE,   # <<< forces install first
+        parser=workflow.source_path("../scripts/parse_genomescope2.py"),
     output:
         histo=outpath("Assemblies/{sample}/QC/GenomeScope2/{sample}.histo"),
         summary=outpath("Assemblies/{sample}/QC/GenomeScope2/{sample}.genomescope2.summary.tsv"),
@@ -24,13 +25,14 @@ rule genomescope2_ploidy:
         ploidies=" ".join(map(str, PLOIDY_RANGE)),
         genomescope_R=os.path.join(GS2_SRC, "genomescope.R"),
         rlib=GS2_RLIB,
-        parse_script=os.path.join(workflow.basedir, "scripts/parse_genomescope2.py"),
         kmc_k=21,
         kmc_ci=1,
         kmc_cs=10000,
         kmc_cx=10000,
         kmc_mem_gb=64,
-        kmc_threads=10,
+    threads: 10
+    resources:
+        mem_mb=64000
     conda:
         "../envs/genomescope2_env.yaml"
     log:
@@ -76,7 +78,7 @@ rule genomescope2_ploidy:
         mkdir -p tmp
 
         echo "[INFO] Running kmc..." >> "{log.kmc}"
-        kmc -k{params.kmc_k} -t{params.kmc_threads} -m{params.kmc_mem_gb} -ci{params.kmc_ci} -cs{params.kmc_cs} \
+        kmc -k{params.kmc_k} -t{threads} -m{params.kmc_mem_gb} -ci{params.kmc_ci} -cs{params.kmc_cs} \
             @FILES reads tmp/ >> "{log.kmc}" 2>&1
 
         HISTO_LOCAL="{wildcards.sample}.kmc.histo"
@@ -93,11 +95,16 @@ rule genomescope2_ploidy:
         ok=0
         for p in {params.ploidies}; do
             odir="{wildcards.sample}_p${{p}}"
+            rm -rf "$odir"
             mkdir -p "$odir"
             echo "[INFO] GenomeScope: p=${{p}} k={params.k} histo=$HISTO_LOCAL outdir=$odir" >> "{log.gs_all}"
-            "{params.genomescope_R}" -k {params.k} -i "$HISTO_LOCAL" -o "$odir" -p "${{p}}" >> "{log.gs_all}" 2>&1 || true
-            if ls "$odir"/* 1>/dev/null 2>&1; then
-                ok=1
+            if "{params.genomescope_R}" -k {params.k} -i "$HISTO_LOCAL" -o "$odir" -p "${{p}}" >> "{log.gs_all}" 2>&1; then
+                if [[ -s "$odir/summary.txt" ]]; then
+                    ok=1
+                fi
+            else
+                echo "[WARN] GenomeScope model p=${{p}} failed" >> "{log.gs_all}"
+                rm -f "$odir/summary.txt"
             fi
         done
 
@@ -107,7 +114,7 @@ rule genomescope2_ploidy:
         fi
 
         # Parse summary
-        python "{params.parse_script}" "{output.summary}" "{log.gs_all}" >> "{log.parse}" 2>&1
+        python {input.parser:q} "{output.summary}" "{log.gs_all}" >> "{log.parse}" 2>&1
         if [[ ! -s "{output.summary}" ]]; then
             echo "[ERROR] Summary TSV empty" >> "{log.parse}"
             exit 1

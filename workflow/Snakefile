@@ -3,8 +3,13 @@
 #############################################
 
 import os
+import re
 from pathlib import Path
 import pandas as pd
+from snakemake.shell import shell
+
+# Keep tool interpreters isolated from packages installed in the user's home.
+shell.prefix("set -euo pipefail; export PYTHONNOUSERSITE=1; ")
 
 project_dir = config.get("project_dir", "").strip().rstrip("/")
 if not project_dir:
@@ -24,13 +29,28 @@ sample_sheet = os.path.abspath(sample_sheet)
 if not Path(sample_sheet).is_file():
     raise FileNotFoundError(f"Sample sheet not found: {sample_sheet}")
 
-samples_df = pd.read_csv(sample_sheet, sep="\t")
+try:
+    samples_df = pd.read_csv(sample_sheet, sep="\t", dtype=str, keep_default_na=False)
+except pd.errors.EmptyDataError as error:
+    raise ValueError("Sample sheet must contain a header and at least one sample row.") from error
 required_columns = {"sample", "HiFi", "Ref", "fq1", "fq2"}
 missing = required_columns - set(samples_df.columns)
 if missing:
     raise ValueError(f"Missing columns in sample sheet: {sorted(missing)}")
+if samples_df.empty:
+    raise ValueError("Sample sheet must contain at least one sample row.")
 
-samples_df["sample"] = samples_df["sample"].astype(str).str.strip()
+samples_df["sample"] = samples_df["sample"].str.strip()
+if samples_df["sample"].eq("").any():
+    raise ValueError("Sample IDs must not be blank.")
+if samples_df["sample"].duplicated().any():
+    raise ValueError("Sample IDs must be unique.")
+if not samples_df["sample"].map(lambda s: bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", s))).all():
+    raise ValueError("Sample IDs must contain only letters, digits, underscores, dots, or hyphens.")
+for col in ("HiFi", "Ref", "fq1", "fq2"):
+    samples_df[col] = samples_df[col].str.strip()
+    if samples_df[col].eq("").any():
+        raise ValueError(f"Sample sheet column {col!r} contains blank paths.")
 SAMPLES = samples_df["sample"].tolist()
 
 def _truthy(v):
@@ -44,6 +64,10 @@ def _pick_samples(df, preferred_cols):
 
 HIFIASM_SAMPLES = _pick_samples(samples_df, ["run_hifiasm", "hifiasm", "use_hifiasm"])
 LJA_SAMPLES     = _pick_samples(samples_df, ["run_lja", "lja", "use_lja"])
+MGA_SAMPLES = (_pick_samples(samples_df, ["run_mga"]) if "run_mga" in samples_df.columns
+               else SAMPLES if _truthy(config.get("run_mga", False)) else [])
+if set(SAMPLES) - (set(HIFIASM_SAMPLES) | set(LJA_SAMPLES)):
+    raise ValueError("Every sample must enable at least one assembler.")
 
 sample_paths = dict(zip(samples_df["sample"], samples_df["HiFi"]))
 sample_refs  = dict(zip(samples_df["sample"], samples_df["Ref"]))
@@ -55,15 +79,26 @@ if "ragtag" in samples_df.columns:
     RAGTAG_SAMPLES = samples_df.loc[samples_df["ragtag"].map(_truthy), "sample"].tolist()
 else:
     RAGTAG_SAMPLES = []
+RAGTAG_HIFIASM_SAMPLES = [s for s in RAGTAG_SAMPLES if s in HIFIASM_SAMPLES]
+RAGTAG_LJA_SAMPLES = [s for s in RAGTAG_SAMPLES if s in LJA_SAMPLES]
+RUN_MULTIQC = _truthy(config.get("run_multiqc", False))
+RUN_TIDK = _truthy(config.get("run_tidk", False))
+RUN_HETEROZYGOSITY = _truthy(config.get("run_heterozygosity", False))
+RUN_QC_SUMMARY = _truthy(config.get("run_qc_summary", False))
+FINAL_ASSEMBLY_PAIRS = [(s, "hifiasm") for s in HIFIASM_SAMPLES] + [(s, "lja") for s in LJA_SAMPLES]
 
 print("RAGTAG_SAMPLES =", RAGTAG_SAMPLES)
 print("HIFIASM_SAMPLES =", HIFIASM_SAMPLES)
 print("LJA_SAMPLES =", LJA_SAMPLES)
+print("MGA_SAMPLES =", MGA_SAMPLES)
 
+missing_inputs = []
 for s in SAMPLES:
     for path in [sample_paths[s], sample_fq1[s], sample_fq2[s], sample_refs[s]]:
         if not Path(path).is_file():
-            raise FileNotFoundError(f"Missing input file for sample {s}: {path}")
+            missing_inputs.append(f"{s}: {path}")
+if missing_inputs:
+    raise FileNotFoundError("Missing sample input files:\n" + "\n".join(missing_inputs))
 
 globals().update({
     "project_dir": project_dir,
@@ -85,9 +120,9 @@ include: "accessors.smk"
 include: "rules/install_soft.smk"
 include: "rules/qc.smk"
 include: "rules/assembly.smk"
+include: "rules/mga.smk"
 include: "rules/purge_dups.smk"
 include: "rules/oatk.smk"
-include: "rules/filtering.smk"
 include: "rules/annotation.smk"
 include: "rules/ragtag.smk"
 include: "rules/final_assemblies.smk"
@@ -97,6 +132,10 @@ include: "rules/chromeister_final.smk"
 include: "rules/ploidy.smk"
 include: "rules/nQuire.smk"
 include: "rules/merqury.smk"
+include: "rules/multiqc.smk"
+include: "rules/tidk.smk"
+include: "rules/heterozygosity.smk"
+include: "rules/qc_summary.smk"
 #include: "rules/chromeister_ragtag.smk"
 
 rule all:
@@ -106,9 +145,10 @@ rule all:
 
         expand(outpath("Assemblies/{sample}/HIFIASM/hifiasm.done"), sample=HIFIASM_SAMPLES),
         expand(outpath("Assemblies/{sample}/LJA/lja.done"), sample=LJA_SAMPLES),
+        expand(outpath("Assemblies/{sample}/MGA/mga.done"), sample=MGA_SAMPLES),
 
-        expand(outpath("Assemblies/{sample}/TELOSEARCH/{sample}.hifireads.fasta"), sample=SAMPLES),
-        expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/TELOSEARCH/telosearch.done"), sample=SAMPLES),
+        expand(outpath("Assemblies/{sample}/FILTERED/barrnap.done"), sample=HIFIASM_SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/GenomeScope2/ploidy.done"), sample=SAMPLES),
         expand(outpath("Assemblies/{sample}/QC/nQuire/nquire.done"), sample=SAMPLES),
 
@@ -130,28 +170,28 @@ rule all:
         # RagTag purged only
         expand(
             outpath("Assemblies/{sample}/RAGTAG/purged-hifiasm_ragtag/ragtag.scaffold.hifiasm.reforder.fasta"),
-            sample=RAGTAG_SAMPLES
+            sample=RAGTAG_HIFIASM_SAMPLES
         ),
         expand(
             outpath("Assemblies/{sample}/RAGTAG/FINAL_{sample}/{sample}.purged.final.fasta"),
-            sample=RAGTAG_SAMPLES
+            sample=RAGTAG_HIFIASM_SAMPLES
         ),
         expand(
             outpath("Assemblies/{sample}/RAGTAG/{sample}_ragtag_purged.done"),
-            sample=RAGTAG_SAMPLES
+            sample=RAGTAG_HIFIASM_SAMPLES
         ),
 
         expand(
             outpath("Assemblies/{sample}/RAGTAG_LJA/purged-lja_ragtag/ragtag.scaffold.lja.reforder.fasta"),
-            sample=RAGTAG_SAMPLES
+            sample=RAGTAG_LJA_SAMPLES
         ),
         expand(
             outpath("Assemblies/{sample}/RAGTAG_LJA/FINAL_{sample}/{sample}.purged.final.fasta"),
-            sample=RAGTAG_SAMPLES
+            sample=RAGTAG_LJA_SAMPLES
         ),
         expand(
             outpath("Assemblies/{sample}/RAGTAG_LJA/{sample}_ragtag_lja.done"),
-            sample=RAGTAG_SAMPLES
+            sample=RAGTAG_LJA_SAMPLES
         ),
 
         # primary Chromeister
@@ -160,4 +200,8 @@ rule all:
 
         # final Chromeister on final mito-integrated assemblies
         expand(outpath("{sample}_FINAL_ASSEMBLIES/hifiasm/CHROMEISTER/.final_hifiasm.done"), sample=HIFIASM_SAMPLES),
-        expand(outpath("{sample}_FINAL_ASSEMBLIES/lja/CHROMEISTER/.final_lja.done"), sample=LJA_SAMPLES)
+        expand(outpath("{sample}_FINAL_ASSEMBLIES/lja/CHROMEISTER/.final_lja.done"), sample=LJA_SAMPLES),
+        [outpath("Assemblies/multiqc/multiqc_report.html")] if RUN_MULTIQC else [],
+        [outpath(f"Assemblies/{s}/QC/tidk/{asm}/tidk.done") for s, asm in FINAL_ASSEMBLY_PAIRS] if RUN_TIDK else [],
+        [outpath(f"Assemblies/{s}/QC/heterozygosity/{asm}/heterozygosity.done") for s, asm in FINAL_ASSEMBLY_PAIRS] if RUN_HETEROZYGOSITY else [],
+        [outpath("Assemblies/qc_summary/assembly_qc.tsv"), outpath("Assemblies/qc_summary/assembly_qc.pdf")] if RUN_QC_SUMMARY else []
